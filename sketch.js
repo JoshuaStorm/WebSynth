@@ -9,6 +9,7 @@ var attackSlider, attack;
 var decaySlider, decay;
 var sustainSlider, sustain;
 var releaseSlider, release;
+
 function setup() {
   createCanvas(1440, 800);
 
@@ -18,7 +19,7 @@ function setup() {
   osc.disconnect();
   
   env = new p5.Env();
-  env.setADSR(0.0001, 0.2, 0.2, 0.5);
+  env.setADSR(0.5, 0.25, 0.5, 0.1);
   env.setRange(.5, 0.0);
   osc.amp(env);
   
@@ -28,47 +29,49 @@ function setup() {
   
   // Start silent
   osc.start();
-  osc.amp(0);
 }
 
 function setupSlider(x, y, size, defaultValue, verticalFlag) {
   var thisSlider = createSlider(0, size, defaultValue);
   thisSlider.position(x, y);
   if (verticalFlag) {
-    thisSlider.style('rotate', 90);
+    thisSlider.style('rotate', 270);
   }
   thisSlider.size(150);
   return thisSlider;
 }
 
 function setupSliders() {
-  filterFreqSlider = setupSlider(20, 100, 5000, 440, true);
+  filterFreqSlider = setupSlider(20, 100, 10000, 440, true);
   text('Filter Frequency', 40, 200);
   // NEED TO MAP VALUES. SLIDERS DON'T LIKE BEING FLOAT VALUES6
-  attackSlider  = setupSlider(100, 100, 5.0, 0, true);
-  decaySlider   = setupSlider(120, 100, 5.0, 1.00, true);
-  sustainSlider = setupSlider(140, 100, 1, 0, true);
-  releaseSlider = setupSlider(160, 100, 5.0, 0, true);
+  attackSlider  = setupSlider(100, 100, 5, 0, true);
+  decaySlider   = setupSlider(120, 100, 5, 1, true);
+  // TODO: correct sustain bug
+  sustainSlider = setupSlider(140, 100, 100, 0, true);
+  releaseSlider = setupSlider(160, 100, 5, 1, true);
 }
-
 
 // A function to play a note
 function playNote(note) {
+  
+  attack  = attackSlider.value();
+  decay   = decaySlider.value();
+  sustain = map(sustainSlider.value(), 0, 100, 0.0, 1.0);
+  release = releaseSlider.value();
+  
   osc.freq(midiToFreq(note));
-  env.set(attack, sustain, decay, release);
-  // Fade it in
-  LPF.set(filterFreq, 50);
+  env.setADSR(attack, decay, sustain, release);
+  LPF.set(filterFreq, 1);
+  
+  osc.start();
+  
   env.play();
 }
 
 function draw() {
   // Update filter frequency with each draw call
   filterFreq = filterFreqSlider.value();
-  attack  = attackSlider.value();
-  decay   = decaySlider.value();
-  sustain = sustainSlider.value();
-  release = sustainSlider.value();
-  
   drawKeyboard();
 }
 
@@ -91,8 +94,6 @@ function drawKeyboard() {
       } else {
         fill(127, 127, 127);
       }
-    } else if (i === 61 || i === 63) {
-      fill(0,0,0)
     } else {
       fill(200, 200, 200);
     }
@@ -111,5 +112,5 @@ function mousePressed() {
 
 // Fade it out when we release
 function mouseReleased() {
-  osc.fade(0,0.5);
+  osc.stop(release + 1);
 }
