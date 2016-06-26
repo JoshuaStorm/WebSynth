@@ -10,8 +10,17 @@ var decaySlider, decay;
 var sustainSlider, sustain;
 var releaseSlider, release;
 
+var keyWidth, keyHeight;
+var xTranslate, yTranslate;
+
 function setup() {
   createCanvas(1440, 800);
+
+  //Initializing some GUI element properties
+  keyWidth = width / (4 * notes.length);
+  keyHeight = height / 4;
+  xTranslate = 800;
+  yTranslate = height / 2;
 
   setupSliders();
   
@@ -55,6 +64,8 @@ function setupSliders() {
 // A function to play a note
 function playNote(note) {
   
+  console.log("note played");
+  
   attack  = attackSlider.value();
   decay   = decaySlider.value();
   sustain = map(sustainSlider.value(), 0, 100, 0.0, 1.0);
@@ -75,20 +86,26 @@ function draw() {
   drawKeyboard();
 }
 
+//Determines if the mouse is over any key on the keyboard  
+function mouseOverKeys() {
+  if ( (mouseX > xTranslate) && (mouseX < (notes.length * keyWidth) + xTranslate) 
+    && (mouseY < keyHeight + yTranslate) && (mouseY > yTranslate) ) {
+  
+    return true;
+  } else {
+    return false;
+  }
+}
+
 
 function drawKeyboard() {
-  var keyWidth = width / (4 * notes.length);
-  var keyHeight = height / 4;
-  
-  var xTranslate = 800;
-  var yTranslate = height / 2;
   
   for (var i = 0; i < notes.length; i++) {
     var x = i * keyWidth;
     
     // If the mouse is over the key
     if ( (mouseX > x + xTranslate) && (mouseX < x + keyWidth + xTranslate) 
-    && (mouseY < keyHeight + yTranslate) && (mouseY > keyHeight - yTranslate) ) {
+      && (mouseY < keyHeight + yTranslate) && (mouseY > yTranslate) ) {
       if (mouseIsPressed) {
         fill(0, 0, 0);
       } else {
@@ -105,9 +122,12 @@ function drawKeyboard() {
 
 // When we click
 function mousePressed() {
-  // Map mouse to the key index
-  var key = floor(map(mouseX, 0, width, 0, notes.length));
-  playNote(notes[key]);
+  
+  if(mouseOverKeys()) {
+    // Map mouse to the key index
+    var key = floor(map(mouseX, xTranslate, xTranslate + (notes.length * keyWidth), 0, notes.length));
+    playNote(notes[key]);
+  }
 }
 
 // Fade it out when we release
