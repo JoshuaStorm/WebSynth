@@ -11,16 +11,16 @@ var sustainSlider, sustain;
 var releaseSlider, release;
 
 var keyWidth, keyHeight;
-var xTranslate, yTranslate;
+var xTranslateKeys, yTranslateKeys;
 
 function setup() {
   createCanvas(1440, 800);
 
-  //Initializing some GUI element properties
+  // Initializing some GUI element properties
   keyWidth = width / (4 * notes.length);
   keyHeight = height / 4;
-  xTranslate = 800;
-  yTranslate = height / 2;
+  xTranslateKeys = 800;
+  yTranslateKeys = height / 2;
 
   setupSliders();
   
@@ -86,10 +86,10 @@ function draw() {
   drawKeyboard();
 }
 
-//Determines if the mouse is over any key on the keyboard  
+// Determines if the mouse is over any key on the keyboard  
 function mouseOverKeys() {
-  if ( (mouseX > xTranslate) && (mouseX < (notes.length * keyWidth) + xTranslate) 
-    && (mouseY < keyHeight + yTranslate) && (mouseY > yTranslate) ) {
+  if ( (mouseX > xTranslateKeys) && (mouseX < (notes.length * keyWidth) + xTranslateKeys) 
+    && (mouseY < keyHeight + yTranslateKeys) && (mouseY > yTranslateKeys) ) {
   
     return true;
   } else {
@@ -104,8 +104,8 @@ function drawKeyboard() {
     var x = i * keyWidth;
     
     // If the mouse is over the key
-    if ( (mouseX > x + xTranslate) && (mouseX < x + keyWidth + xTranslate) 
-      && (mouseY < keyHeight + yTranslate) && (mouseY > yTranslate) ) {
+    if ( (mouseX > x + xTranslateKeys) && (mouseX < x + keyWidth + xTranslateKeys) 
+      && (mouseY < keyHeight + yTranslateKeys) && (mouseY > yTranslateKeys) ) {
       if (mouseIsPressed) {
         fill(0, 0, 0);
       } else {
@@ -116,7 +116,7 @@ function drawKeyboard() {
     }
     
     // Draw the key
-    rect(x + xTranslate, yTranslate, keyWidth - 1, keyHeight - 1);
+    rect(x + xTranslateKeys, yTranslateKeys, keyWidth - 1, keyHeight - 1);
   }
 }
 
@@ -124,8 +124,7 @@ function drawKeyboard() {
 function mousePressed() {
   
   if(mouseOverKeys()) {
-    // Map mouse to the key index
-    var key = floor(map(mouseX, xTranslate, xTranslate + (notes.length * keyWidth), 0, notes.length));
+    var key = floor(map(mouseX, xTranslateKeys, xTranslateKeys + (notes.length * keyWidth), 0, notes.length));
     playNote(notes[key]);
   }
 }
