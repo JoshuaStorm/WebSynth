@@ -10,8 +10,17 @@ var decaySlider, decay;
 var sustainSlider, sustain;
 var releaseSlider, release;
 
+var keyWidth, keyHeight;
+var xTranslateKeys, yTranslateKeys;
+
 function setup() {
   createCanvas(1440, 800);
+
+  // Initializing some GUI element properties
+  keyWidth = width / (4 * notes.length);
+  keyHeight = height / 4;
+  xTranslateKeys = 800;
+  yTranslateKeys = height / 2;
 
   setupSliders();
   
@@ -55,6 +64,8 @@ function setupSliders() {
 // A function to play a note
 function playNote(note) {
   
+  console.log("note played");
+  
   attack  = attackSlider.value();
   decay   = decaySlider.value();
   sustain = map(sustainSlider.value(), 0, 100, 0.0, 1.0);
@@ -75,20 +86,26 @@ function draw() {
   drawKeyboard();
 }
 
+// Determines if the mouse is over any key on the keyboard  
+function mouseOverKeys() {
+  if ( (mouseX > xTranslateKeys) && (mouseX < (notes.length * keyWidth) + xTranslateKeys) 
+    && (mouseY < keyHeight + yTranslateKeys) && (mouseY > yTranslateKeys) ) {
+  
+    return true;
+  } else {
+    return false;
+  }
+}
+
 
 function drawKeyboard() {
-  var keyWidth = width / (4 * notes.length);
-  var keyHeight = height / 4;
-  
-  var xTranslate = 800;
-  var yTranslate = height / 2;
   
   for (var i = 0; i < notes.length; i++) {
     var x = i * keyWidth;
     
     // If the mouse is over the key
-    if ( (mouseX > x + xTranslate) && (mouseX < x + keyWidth + xTranslate) 
-    && (mouseY < keyHeight + yTranslate) && (mouseY > keyHeight - yTranslate) ) {
+    if ( (mouseX > x + xTranslateKeys) && (mouseX < x + keyWidth + xTranslateKeys) 
+      && (mouseY < keyHeight + yTranslateKeys) && (mouseY > yTranslateKeys) ) {
       if (mouseIsPressed) {
         fill(0, 0, 0);
       } else {
@@ -99,15 +116,17 @@ function drawKeyboard() {
     }
     
     // Draw the key
-    rect(x + xTranslate, yTranslate, keyWidth - 1, keyHeight - 1);
+    rect(x + xTranslateKeys, yTranslateKeys, keyWidth - 1, keyHeight - 1);
   }
 }
 
 // When we click
 function mousePressed() {
-  // Map mouse to the key index
-  var key = floor(map(mouseX, 0, width, 0, notes.length));
-  playNote(notes[key]);
+  
+  if(mouseOverKeys()) {
+    var key = floor(map(mouseX, xTranslateKeys, xTranslateKeys + (notes.length * keyWidth), 0, notes.length));
+    playNote(notes[key]);
+  }
 }
 
 // Fade it out when we release
