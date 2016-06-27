@@ -83,8 +83,6 @@ function setupSliders() {
 
 function setupSliderLabel(sliderX, sliderY, verticalFlag, label){
   
-  textAlign(CENTER);
-
   textSize(labelFontSize);
   var labelWidth = textWidth(label);
   var labelX = sliderX;
@@ -96,18 +94,30 @@ function setupSliderLabel(sliderX, sliderY, verticalFlag, label){
     labelY = labelY * 2;
   }
 
+
   // Wrap text if the ratio of text width to canvas width is too big ( >= .08)
   if((textWidth(label) / width) >= (2 / 25)) {
     var labelLines = label.split(" ");
     var modifier = 0;
     
     for(var line in labelLines) {
-      text(labelLines[line], labelX, labelY + modifier);
+      var lineWidth = textWidth(labelLines[line]);
+      var centeredX = labelX - floor(lineWidth / 2);
+      
+      textL = createP(labelLines[line]);
+      textL.position(centeredX, labelY + modifier);
+      textL.style("color", "#000");
+      textL.style("font-size", labelFontSize + "pt");
       modifier += labelFontSize;
     }
     
   } else {
-      text(label, labelX, labelY);
+    var centeredX = labelX - floor(labelWidth / 2);
+    
+    textL = createP(label);
+    textL.position(centeredX, labelY);
+    textL.style("color", "#000");
+    textL.style("font-size", labelFontSize + "pt");
   }
 }
 
@@ -199,10 +209,21 @@ function keyTyped() {
   for(var keyboardKey = 0; keyboardKey < keyboardKeys.length; keyboardKey++) {
     
     if(key === keyboardKeys[keyboardKey]) {
-      keysPressed.push(key);
-      pressedIndices.push(keyboardKey);
+      var keyAlreadyPresent = false;
       
-      playNote(keyboardKey);
+      for(var pressedKey = 0; pressedKey < keysPressed.length; pressedKey++) {
+          if(keysPressed[pressedKey] == key) {
+              
+              keyAlreadyPresent = true;
+          }
+      }
+      
+      if(!keyAlreadyPresent) {
+        keysPressed.push(key);
+        pressedIndices.push(keyboardKey);
+      
+        playNote(keyboardKey);
+      }
     }
   }
 }
@@ -213,9 +234,24 @@ function keyReleased() {
   for(var pressedKey = 0; pressedKey < keysPressed.length; pressedKey++) {
 
     if(key.toLowerCase() === keysPressed[pressedKey]) {
-      keysPressed.splice(pressedKey, 1);
-      pressedIndices.splice(pressedKey, 1);
       
+      if(keysPressed.length === 1) {
+        keysPressed = [];
+        pressedIndices = [];
+      } else {
+        keysPressed.splice(pressedKey, 1);
+        pressedIndices.splice(pressedKey, 1);
+      }
+      break;
     }
   }
+}
+
+//Called whenever the window dimensions change
+function windowResized() {
+  
+  //Wipes the canvas and resets elements dynamically
+  clear();
+  removeElements();
+  setup();
 }
