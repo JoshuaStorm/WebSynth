@@ -4,6 +4,8 @@ var notes = [ 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
 var osc;
 var env;
 var LPF;
+var fft;
+
 var filterFreqSlider, filterFreq;
 var attackSlider, attack;
 var decaySlider, decay;
@@ -35,6 +37,7 @@ function setup() {
   setupSliders();
   
   osc = new p5.TriOsc();
+  // Disconnect osc from output, it will go through the filter
   osc.disconnect();
   
   env = new p5.Env();
@@ -44,11 +47,11 @@ function setup() {
   
   LPF = new p5.Filter();
   osc.connect(LPF);
-  
-  
-  // Start silent
-  osc.start();
+  // Setup a FFT analyzer at 256 bitrate
+  fft = new p5.FFT(0, 256);
 }
+
+
 
 function setupSlider(x, y, size, defaultValue, verticalFlag) {
   var thisSlider = createSlider(0, size, defaultValue);
@@ -106,7 +109,7 @@ function setupSliderLabel(sliderX, sliderY, verticalFlag, label){
 
 // A function to play a note
 function playNote(note) {
-
+  
   attack  = attackSlider.value();
   decay   = decaySlider.value();
   sustain = map(sustainSlider.value(), 0, 100, 0.0, 1.0);
@@ -117,11 +120,12 @@ function playNote(note) {
   LPF.set(filterFreq, 1);
   
   osc.start();
-  
   env.play();
 }
 
 function draw() {
+  var samples = fft.waveform();
+  drawOscilloscope(samples);
   // Update filter frequency with each draw call
   filterFreq = filterFreqSlider.value();
   drawKeyboard();
@@ -137,7 +141,6 @@ function mouseOverKeys() {
     return false;
   }
 }
-
 
 function drawKeyboard() {
   
