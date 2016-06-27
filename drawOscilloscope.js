@@ -1,9 +1,9 @@
 function drawOscilloscope(samples, x, y, rectWidth, rectHeight) {
-  var distanceFromTop = 400;
-  var distanceFromLeft = 20;
+  var distanceFromTop = height / 2;
+  var distanceFromLeft = width / 72;
   
-  var rectWidth = 300;
-  var rectHeight = 200;
+  var rectWidth = width / 5;
+  var rectHeight = height / 4;
   
   fill(200, 200, 200);
   rect(distanceFromLeft, distanceFromTop, rectWidth, rectHeight);
