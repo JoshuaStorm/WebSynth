@@ -11,19 +11,29 @@ var attackSlider, attack;
 var decaySlider, decay;
 var sustainSlider, sustain;
 var releaseSlider, release;
+var sliderHeight;
+var xTranslateSliders;
+var sliderSpacer;
 
 var keyWidth, keyHeight;
 var xTranslateKeys, yTranslateKeys;
 
+var labelFontSize;
 function setup() {
-  createCanvas(1440, 800);
+  createCanvas(windowWidth, windowHeight);
 
   // Initializing some GUI element properties
   keyWidth = width / (4 * notes.length);
   keyHeight = height / 4;
-  xTranslateKeys = 800;
+  xTranslateKeys = width / 2;
   yTranslateKeys = height / 2;
-
+  
+  sliderHeight = height / 8;
+  sliderSpacer = width / 30;
+  xTranslateSliders = width / 72;
+  
+  labelFontSize = floor(height / 50);
+  
   setupSliders();
   
   osc = new p5.TriOsc();
@@ -45,23 +55,56 @@ function setup() {
 
 function setupSlider(x, y, size, defaultValue, verticalFlag) {
   var thisSlider = createSlider(0, size, defaultValue);
-  thisSlider.position(x, y);
+
   if (verticalFlag) {
     thisSlider.style('rotate', 270);
   }
-  thisSlider.size(150);
+  thisSlider.size(sliderHeight);
+  thisSlider.position(x, y);
+
   return thisSlider;
 }
 
 function setupSliders() {
-  filterFreqSlider = setupSlider(20, 100, 10000, 440, true);
-  text('Filter Frequency', 40, 200);
+  filterFreqSlider = setupSlider(xTranslateSliders, sliderHeight, 10000, 440, true);
+  setupSliderLabel(xTranslateSliders, sliderHeight, true, 'Filter Frequency');
+  
   // NEED TO MAP VALUES. SLIDERS DON'T LIKE BEING FLOAT VALUES6
-  attackSlider  = setupSlider(100, 100, 5, 0, true);
-  decaySlider   = setupSlider(120, 100, 5, 1, true);
+  attackSlider  = setupSlider(xTranslateSliders + (3 * sliderSpacer), sliderHeight, 5, 0, true);
+  decaySlider   = setupSlider(xTranslateSliders + (4 * sliderSpacer), sliderHeight, 5, 1, true);
   // TODO: correct sustain bug
-  sustainSlider = setupSlider(140, 100, 100, 0, true);
-  releaseSlider = setupSlider(160, 100, 5, 1, true);
+  sustainSlider = setupSlider(xTranslateSliders + (5 * sliderSpacer), sliderHeight, 100, 0, true);
+  releaseSlider = setupSlider(xTranslateSliders + (6 * sliderSpacer), sliderHeight, 5, 1, true);
+}
+
+function setupSliderLabel(sliderX, sliderY, verticalFlag, label){
+  
+  textAlign(CENTER);
+
+  textSize(labelFontSize);
+  var labelWidth = textWidth(label);
+  var labelX = sliderX;
+  var labelY = sliderY;
+
+  if(verticalFlag) {
+    
+    labelX = xTranslateSliders + (sliderHeight / 2);
+    labelY = labelY * 2;
+  }
+
+  // Wrap text if the ratio of text width to canvas width is too big ( >= .08)
+  if((textWidth(label) / width) >= (2 / 25)) {
+    var labelLines = label.split(" ");
+    var modifier = 0;
+    
+    for(var line in labelLines) {
+      text(labelLines[line], labelX, labelY + modifier);
+      modifier += labelFontSize;
+    }
+    
+  } else {
+      text(label, labelX, labelY);
+  }
 }
 
 // A function to play a note
