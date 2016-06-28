@@ -1,5 +1,8 @@
 // The midi notes of a scale
 var notes = [ 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
+var keyboardKeys = ['a', 'w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u'];
+var keysPressed = [];
+var pressedIndices = [];
 
 var osc;
 var env;
@@ -19,6 +22,7 @@ var keyWidth, keyHeight;
 var xTranslateKeys, yTranslateKeys;
 
 var labelFontSize;
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
@@ -77,14 +81,13 @@ function setupSliders() {
   releaseSlider = setupSlider(xTranslateSliders + (6 * sliderSpacer), sliderHeight, 5, 1, true);
 }
 
-function setupSliderLabel(sliderX, sliderY, verticalFlag, label){
+function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText){
   
-  textAlign(CENTER);
-
   textSize(labelFontSize);
-  var labelWidth = textWidth(label);
+  var labelWidth = textWidth(labelText);
   var labelX = sliderX;
   var labelY = sliderY;
+  var label;
 
   if(verticalFlag) {
     
@@ -92,18 +95,30 @@ function setupSliderLabel(sliderX, sliderY, verticalFlag, label){
     labelY = labelY * 2;
   }
 
+
   // Wrap text if the ratio of text width to canvas width is too big ( >= .08)
-  if((textWidth(label) / width) >= (2 / 25)) {
-    var labelLines = label.split(" ");
+  if((textWidth(labelText) / width) >= (2 / 25)) {
+    var labelLines = labelText.split(" ");
     var modifier = 0;
     
     for(var line in labelLines) {
-      text(labelLines[line], labelX, labelY + modifier);
+      var lineWidth = textWidth(labelLines[line]);
+      var centeredX = labelX - floor(lineWidth / 2);
+      
+      label = createP(labelLines[line]);
+      label.position(centeredX, labelY + modifier);
+      label.style("color", "#000");
+      label.style("font-size", labelFontSize + "pt");
       modifier += labelFontSize;
     }
     
   } else {
-      text(label, labelX, labelY);
+    var centeredX = labelX - floor(labelWidth / 2);
+    
+    label = createP(labelText);
+    label.position(centeredX, labelY);
+    label.style("color", "#000");
+    label.style("font-size", labelFontSize + "pt");
   }
 }
 
@@ -146,6 +161,7 @@ function drawKeyboard() {
   
   for (var i = 0; i < notes.length; i++) {
     var x = i * keyWidth;
+    var keyPressed = false;
     
     // If the mouse is over the key
     if ( (mouseX > x + xTranslateKeys) && (mouseX < x + keyWidth + xTranslateKeys) 
@@ -156,7 +172,18 @@ function drawKeyboard() {
         fill(127, 127, 127);
       }
     } else {
-      fill(200, 200, 200);
+      
+      for(var index = 0; index < pressedIndices.length; index++) {
+        
+        if(i === pressedIndices[index]) {
+          fill(0, 0, 0);
+          keyPressed = true;
+        }
+      }
+      
+      if(!keyPressed) { 
+        fill(200, 200, 200);
+      }
     }
     
     // Draw the key
@@ -176,4 +203,56 @@ function mousePressed() {
 // Fade it out when we release
 function mouseReleased() {
   osc.stop(release + 1);
+}
+
+//When we press down a key (Ignores action keys)
+function keyTyped() {
+  for(var keyIndex in keyboardKeys) {
+    
+    if(key === keyboardKeys[keyIndex]) {
+      var keyAlreadyPressed = false;
+      
+      for(var pressedKey in keysPressed) {
+          if(keysPressed[pressedKey] === key) {
+              
+              keyAlreadyPressed = true;
+          }
+      }
+      
+      if(!keyAlreadyPressed) {
+        keysPressed.push(key);
+        pressedIndices.push(keyboardKey);
+      
+        playNote(keyboardKey);
+      }
+    }
+  }
+}
+
+// Called when the key is released
+function keyReleased() {
+  
+  for(var pressedKey = 0; pressedKey < keysPressed.length; pressedKey++) {
+
+    if(key.toLowerCase() === keysPressed[pressedKey]) {
+      
+      if(keysPressed.length === 1) {
+        keysPressed = [];
+        pressedIndices = [];
+      } else {
+        keysPressed.splice(pressedKey, 1);
+        pressedIndices.splice(pressedKey, 1);
+      }
+      break;
+    }
+  }
+}
+
+// Called whenever the window dimensions change
+function windowResized() {
+  
+  // Wipes the canvas and resets elements dynamically
+  clear();
+  removeElements();
+  setup();
 }
