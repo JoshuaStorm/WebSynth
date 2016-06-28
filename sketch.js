@@ -81,12 +81,13 @@ function setupSliders() {
   releaseSlider = setupSlider(xTranslateSliders + (6 * sliderSpacer), sliderHeight, 5, 1, true);
 }
 
-function setupSliderLabel(sliderX, sliderY, verticalFlag, label){
+function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText){
   
   textSize(labelFontSize);
-  var labelWidth = textWidth(label);
+  var labelWidth = textWidth(labelText);
   var labelX = sliderX;
   var labelY = sliderY;
+  var label;
 
   if(verticalFlag) {
     
@@ -96,28 +97,28 @@ function setupSliderLabel(sliderX, sliderY, verticalFlag, label){
 
 
   // Wrap text if the ratio of text width to canvas width is too big ( >= .08)
-  if((textWidth(label) / width) >= (2 / 25)) {
-    var labelLines = label.split(" ");
+  if((textWidth(labelText) / width) >= (2 / 25)) {
+    var labelLines = labelText.split(" ");
     var modifier = 0;
     
     for(var line in labelLines) {
       var lineWidth = textWidth(labelLines[line]);
       var centeredX = labelX - floor(lineWidth / 2);
       
-      textL = createP(labelLines[line]);
-      textL.position(centeredX, labelY + modifier);
-      textL.style("color", "#000");
-      textL.style("font-size", labelFontSize + "pt");
+      label = createP(labelLines[line]);
+      label.position(centeredX, labelY + modifier);
+      label.style("color", "#000");
+      label.style("font-size", labelFontSize + "pt");
       modifier += labelFontSize;
     }
     
   } else {
     var centeredX = labelX - floor(labelWidth / 2);
     
-    textL = createP(label);
-    textL.position(centeredX, labelY);
-    textL.style("color", "#000");
-    textL.style("font-size", labelFontSize + "pt");
+    label = createP(labelText);
+    label.position(centeredX, labelY);
+    label.style("color", "#000");
+    label.style("font-size", labelFontSize + "pt");
   }
 }
 
@@ -206,19 +207,19 @@ function mouseReleased() {
 
 //When we press down a key (Ignores action keys)
 function keyTyped() {
-  for(var keyboardKey = 0; keyboardKey < keyboardKeys.length; keyboardKey++) {
+  for(var keyIndex in keyboardKeys) {
     
-    if(key === keyboardKeys[keyboardKey]) {
-      var keyAlreadyPresent = false;
+    if(key === keyboardKeys[keyIndex]) {
+      var keyAlreadyPressed = false;
       
-      for(var pressedKey = 0; pressedKey < keysPressed.length; pressedKey++) {
-          if(keysPressed[pressedKey] == key) {
+      for(var pressedKey in keysPressed) {
+          if(keysPressed[pressedKey] === key) {
               
-              keyAlreadyPresent = true;
+              keyAlreadyPressed = true;
           }
       }
       
-      if(!keyAlreadyPresent) {
+      if(!keyAlreadyPressed) {
         keysPressed.push(key);
         pressedIndices.push(keyboardKey);
       
@@ -228,7 +229,7 @@ function keyTyped() {
   }
 }
 
-//Called when the key is released
+// Called when the key is released
 function keyReleased() {
   
   for(var pressedKey = 0; pressedKey < keysPressed.length; pressedKey++) {
@@ -247,10 +248,10 @@ function keyReleased() {
   }
 }
 
-//Called whenever the window dimensions change
+// Called whenever the window dimensions change
 function windowResized() {
   
-  //Wipes the canvas and resets elements dynamically
+  // Wipes the canvas and resets elements dynamically
   clear();
   removeElements();
   setup();
