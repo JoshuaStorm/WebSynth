@@ -73,16 +73,13 @@ function setupSliders() {
   filterFreqSlider = setupSlider(xTranslateSliders, sliderHeight, 10000, 440, true);
   setupSliderLabel(xTranslateSliders, sliderHeight, true, 'Filter Frequency');
   
-  // NEED TO MAP VALUES. SLIDERS DON'T LIKE BEING FLOAT VALUES6
   attackSlider  = setupSlider(xTranslateSliders + (3 * sliderSpacer), sliderHeight, 5, 0, true);
   decaySlider   = setupSlider(xTranslateSliders + (4 * sliderSpacer), sliderHeight, 5, 1, true);
-  // TODO: correct sustain bug
   sustainSlider = setupSlider(xTranslateSliders + (5 * sliderSpacer), sliderHeight, 100, 0, true);
   releaseSlider = setupSlider(xTranslateSliders + (6 * sliderSpacer), sliderHeight, 5, 1, true);
 }
 
 function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText){
-  
   textSize(labelFontSize);
   var labelWidth = textWidth(labelText);
   var labelX = sliderX;
@@ -124,7 +121,6 @@ function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText){
 
 // A function to play a note
 function playNote(note) {
-  
   attack  = attackSlider.value();
   decay   = decaySlider.value();
   sustain = map(sustainSlider.value(), 0, 100, 0.0, 1.0);
@@ -158,7 +154,6 @@ function mouseOverKeys() {
 }
 
 function drawKeyboard() {
-  
   for (var i = 0; i < notes.length; i++) {
     var x = i * keyWidth;
     var keyPressed = false;
@@ -172,7 +167,6 @@ function drawKeyboard() {
         fill(127, 127, 127);
       }
     } else {
-      
       for(var index = 0; index < pressedIndices.length; index++) {
         
         if(i === pressedIndices[index]) {
@@ -180,7 +174,6 @@ function drawKeyboard() {
           keyPressed = true;
         }
       }
-      
       if(!keyPressed) { 
         fill(200, 200, 200);
       }
@@ -193,7 +186,6 @@ function drawKeyboard() {
 
 // When we click
 function mousePressed() {
-  
   if(mouseOverKeys()) {
     var key = floor(map(mouseX, xTranslateKeys, xTranslateKeys + (notes.length * keyWidth), 0, notes.length));
     playNote(notes[key]);
@@ -221,9 +213,9 @@ function keyTyped() {
       
       if(!keyAlreadyPressed) {
         keysPressed.push(key);
-        pressedIndices.push(keyboardKey);
+        pressedIndices.push(keyIndex);
       
-        playNote(keyboardKey);
+        playNote(notes[keyIndex]);
       }
     }
   }
@@ -231,11 +223,8 @@ function keyTyped() {
 
 // Called when the key is released
 function keyReleased() {
-  
   for(var pressedKey = 0; pressedKey < keysPressed.length; pressedKey++) {
-
     if(key.toLowerCase() === keysPressed[pressedKey]) {
-      
       if(keysPressed.length === 1) {
         keysPressed = [];
         pressedIndices = [];
@@ -250,7 +239,6 @@ function keyReleased() {
 
 // Called whenever the window dimensions change
 function windowResized() {
-  
   // Wipes the canvas and resets elements dynamically
   clear();
   removeElements();
