@@ -28,7 +28,7 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   // Initializing some GUI element properties
-  keyWidth = width / (4 * NOTES.length);
+  keyWidth = width / (4 * MIDI_NOTES.length);
   keyHeight = height / 4;
   xTranslateKeys = width / 2;
   yTranslateKeys = height / 2;
