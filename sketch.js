@@ -1,5 +1,4 @@
-// The midi notes of a scale
-var NOTES = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
+var MIDI_NOTES = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
 var KEYBOARD_KEYS = ['a', 'w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u'];
 var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'r':5, 'f':6, 't':7,
                     'g':8, 'y':9, 'h':10, 'u':11};
@@ -141,7 +140,7 @@ function draw() {
 
 // Determines if the mouse is over any key on the keyboard
 function mouseOverKeys() {
-  if ( (mouseX > xTranslateKeys) && (mouseX < (NOTES.length * keyWidth) + xTranslateKeys)
+  if ( (mouseX > xTranslateKeys) && (mouseX < (MIDI_NOTES.length * keyWidth) + xTranslateKeys)
     && (mouseY < keyHeight + yTranslateKeys) && (mouseY > yTranslateKeys) ) {
     return true;
   } else {
@@ -150,7 +149,7 @@ function mouseOverKeys() {
 }
 
 function drawKeyboard() {
-  for (var i = 0; i < NOTES.length; i++) {
+  for (var i = 0; i < MIDI_NOTES.length; i++) {
     var x = i * keyWidth;
     var keyPressed = false;
 
@@ -179,9 +178,9 @@ function drawKeyboard() {
 function mousePressed() {
   if(mouseOverKeys()) {
     var key = floor(map(mouseX, xTranslateKeys,
-      xTranslateKeys + (NOTES.length * keyWidth), 0, NOTES.length));
+      xTranslateKeys + (MIDI_NOTES.length * keyWidth), 0, MIDI_NOTES.length));
 
-    playNote(NOTES[key]);
+    playNote(MIDI_NOTES[key]);
   }
 }
 
@@ -196,7 +195,7 @@ function keyTyped() {
     if (key === KEYBOARD_KEYS[keyIndex]) {
       keysPressed[key] = true;
       pressedIndices[keyIndex] = true;
-      playNote(NOTES[keyIndex]);
+      playNote(MIDI_NOTES[keyIndex]);
     }
   }
 }
