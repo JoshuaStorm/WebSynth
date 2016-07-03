@@ -7,9 +7,9 @@ var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
 var keysPressed = {};
 var pressedIndices = {};
 
-var osc;
-var ampSlider, amp;
-var env;
+var sawOsc, sqrOsc, triOsc, subOsc;
+var sawSlider, sawAmp, sqrSlider, sqrAmp, triSlider, triAmp, subSlider, subAmp;
+var sawEnv, sqrEnv, triEnv, subEnv;
 var lpf;
 var fft;
 
@@ -43,29 +43,50 @@ function preload() {
 
 // Called upon loading, setup audio elements
 function setup() {
-  osc = new p5.SawOsc();
-  // Disconnect osc from output, it will go through the filter
-  osc.disconnect();
-  osc.start();
-
-  env = new p5.Env();
-  env.setADSR(0.5, 0.25, 0.5, 0.1);
-  env.setRange(.5, 0.0);
-  osc.amp(env);
-
   lpf = new p5.Filter();
-  osc.connect(lpf);
+  setupOscillators(lpf);
   // Setup a FFT analyzer at 256 bitrate
   fft = new p5.FFT(0, 256);
 }
 
+// Set up all of our oscillators
+// TODO: Optimize to only setup oscillators in use to avoid unnecessary computation
+function setupOscillators(filter) {
+  sawOsc = new p5.SawOsc();
+  sqrOsc = new p5.SqrOsc();
+  triOsc = new p5.TriOsc();
+  subOsc = new p5.SinOsc();
+  var oscs = [sawOsc, sqrOsc, triOsc, subOsc];
+  sawEnv = new p5.Env();
+  sqrEnv = new p5.Env();
+  triEnv = new p5.Env();
+  subEnv = new p5.Env();
+  var envs = [sawEnv, sqrEnv, triEnv, subEnv];
+
+  for (var oscIndex in oscs) {
+    var oscillator = oscs[oscIndex];
+    var envelope = envs[oscIndex];
+
+    console.log(envelope);
+
+    // Disconnect osc from output, it will go through the filter
+    oscillator.disconnect();
+    oscillator.start();
+    oscillator.amp(envelope);
+    oscillator.connect(filter);
+    envelope.setExp();
+  }
+}
+
+
 // This is a mess of GUI setup, don't mind it too much
 function setupSliders() {
+  // Filter sliders
   filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 10000, 10000, true);
   setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), sliderHeight, true, 'Filter Frequency');
   filterResSlider  = setupSlider(xTranslateSliders + (2 * sliderSpacer), sliderHeight, 50, 0, true);
   setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), sliderHeight, true, 'Filter Resonance');
-
+  // ADSR sliders
   attackSlider  = setupSlider(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight,   5, 0, true);
   setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), 2 * sliderHeight, true, 'A');
   decaySlider   = setupSlider(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight,   5, 1, true);
@@ -74,9 +95,15 @@ function setupSliders() {
   setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2 * sliderHeight, true, 'S');
   releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight,   5, 1, true);
   setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2 * sliderHeight, true, 'R');
-
-  ampSlider = setupSlider(xTranslateSliders + (18 * sliderSpacer), sliderHeight, 100, 25, true);
-  setupSliderLabel(xTranslateSliders + (18 * sliderSpacer), sliderHeight, true, 'Amp');
+  // Oscillator sliders
+  sawSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 100, 50, true);
+  setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), sliderHeight, true, 'SAW');
+  sqrSlider = setupSlider(xTranslateSliders + (16 * sliderSpacer), sliderHeight, 100, 0, true);
+  setupSliderLabel(xTranslateSliders + (16 * sliderSpacer), sliderHeight, true, 'SQR');
+  triSlider = setupSlider(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 100, 0, true);
+  setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), sliderHeight, true, 'TRI');
+  subSlider = setupSlider(xTranslateSliders + (18 * sliderSpacer), sliderHeight, 100, 0, true);
+  setupSliderLabel(xTranslateSliders + (18 * sliderSpacer), sliderHeight, true, 'SUB');
 }
 
 function playNote(note) {
@@ -84,20 +111,46 @@ function playNote(note) {
   decay   = decaySlider.value();
   sustain = map(sustainSlider.value(), 0, 100, 0.0, 1.0);
   release = releaseSlider.value();
-  amp = map(ampSlider.value(), 0, 100, 0.0, 1.0);
+  sawAmp  = map(sawSlider.value(), 0, 100, 0.0, 1.0);
+  sqrAmp  = map(sqrSlider.value(), 0, 100, 0.0, 1.0);
+  triAmp  = map(triSlider.value(), 0, 100, 0.0, 1.0);
+  subAmp  = map(subSlider.value(), 0, 100, 0.0, 1.0);
 
-  osc.freq(midiToFreq(note));
-  env.setADSR(attack, decay, sustain, release);
-  env.setRange(amp, 0.0); // 0.0 is the release value)
-  env.setExp(); // Set the envelope to be an exponential curve
+  sawOsc.freq(midiToFreq(note));
+  sqrOsc.freq(midiToFreq(note));
+  triOsc.freq(midiToFreq(note));
+  subOsc.freq(midiToFreq(note));
+
+  sawEnv.setADSR(attack, decay, sustain, release);
+  sawEnv.setRange(sawAmp, 0.0); // 0.0 is the release value
+  sqrEnv.setADSR(attack, decay, sustain, release);
+  sqrEnv.setRange(sqrAmp, 0.0); // 0.0 is the release value
+  triEnv.setADSR(attack, decay, sustain, release);
+  triEnv.setRange(triAmp, 0.0); // 0.0 is the release value
+  subEnv.setADSR(attack, decay, sustain, release);
+  subEnv.setRange(subAmp, 0.0); // 0.0 is the release value
+
   lpf.set(filterFreq, filterRes);
-
-  env.triggerAttack();
+  if (sawAmp > 0) {
+    sawEnv.triggerAttack();
+  }
+  if (sqrAmp > 0) {
+    sqrEnv.triggerAttack();
+  }
+  if (triAmp > 0) {
+    triEnv.triggerAttack();
+  }
+  if (subAmp > 0) {
+    subEnv.triggerAttack();
+  }
 }
 
 function endNote() {
   if (!mouseIsPressed && !keyIsPressed) {
-    env.triggerRelease();
+    sawEnv.triggerRelease();
+    sqrEnv.triggerRelease();
+    triEnv.triggerRelease();
+    subEnv.triggerRelease();
   }
 }
 
