@@ -12,9 +12,9 @@ function drawOscilloscope(samples) {
   strokeWeight(0.5);
 
   beginShape();
-  for (var i = 0; i < samples.length; i++) {
-    var x = map(i, 0, samples.length, 0, scopeWidth);
-    var y = map(samples[i], -1, 1, -scopeHeight / 2, scopeHeight / 2);
+  for (var sampleIndex in samples) {
+    var x = map(sampleIndex, 0, samples.length, 0, scopeWidth);
+    var y = map(samples[sampleIndex], -1, 1, -scopeHeight / 2, scopeHeight / 2);
     vertex(x + xTranslateScope, y + scopeHeight/2 + yTranslateScope);
   }
   endShape();

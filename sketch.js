@@ -1,7 +1,9 @@
 var MIDI_NOTES = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
-var KEYBOARD_KEYS = ['a', 'w', 's', 'e', 'd', 'r', 'f', 't', 'g', 'y', 'h', 'u'];
-var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'r':5, 'f':6, 't':7,
-                    'g':8, 'y':9, 'h':10, 'u':11};
+var KEYBOARD_KEYS = ['a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j'];
+var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
+                    'y':8, 'h':9, 'u':10, 'j':11};
+
+// Global setup, common in p5.js
 var keysPressed = {};
 var pressedIndices = {};
 
@@ -120,8 +122,8 @@ function mouseOverKeys() {
 }
 
 function drawKeyboard() {
-  for (var i = 0; i < MIDI_NOTES.length; i++) {
-    var x = i * keyWidth;
+  for (var noteIndex in MIDI_NOTES) {
+    var x = noteIndex * keyWidth;
     // If the mouse is over the key
     if ( (mouseX > x + xTranslateKeys) && (mouseX < x + keyWidth + xTranslateKeys)
       && (mouseY < keyHeight + yTranslateKeys) && (mouseY > yTranslateKeys) ) {
@@ -131,7 +133,7 @@ function drawKeyboard() {
         fill(127, 127, 127);
       }
     } else {
-      if (pressedIndices[i] !== undefined) {
+      if (pressedIndices[noteIndex] !== undefined) {
         fill(0, 0, 0);
       }
       else {

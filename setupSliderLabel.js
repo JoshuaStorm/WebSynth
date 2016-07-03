@@ -16,11 +16,11 @@ function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText) {
     var labelLines = labelText.split(' ');
     var modifier = 0;
 
-    for(var line in labelLines) {
-      var lineWidth = textWidth(labelLines[line]);
+    for (var lineIndex in labelLines) {
+      var lineWidth = textWidth(labelLines[lineIndex]);
       var centeredX = labelX - floor(lineWidth / 2);
 
-      label = createP(labelLines[line]);
+      label = createP(labelLines[lineIndex]);
       label.position(centeredX, labelY + modifier);
       label.style('color', '#000');
       label.style('font-size', labelFontSize + 'pt');
