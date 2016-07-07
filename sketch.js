@@ -1,3 +1,5 @@
+'use strict';
+
 var MIDI_NOTES = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
 var KEYBOARD_KEYS = ['a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j'];
 var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
@@ -13,6 +15,7 @@ var sawEnv, sqrEnv, triEnv, subEnv;
 var lpf;
 var fft;
 
+var octaveSlider;
 var filterFreqSlider, filterFreq;
 var filterResSlider, filterRes;
 var attackSlider, attack;
@@ -26,8 +29,11 @@ var sliderSpacer;
 var keyWidth, keyHeight;
 var xTranslateKeys, yTranslateKeys;
 
-// This is a mess of GUI setup, don't mind it too much
+// This is a mess of GUI setup, don't mind it too much (I am not a UI/UX designer)
 function setupSliders() {
+  // Octave slider
+  octaveSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, 4, 2, false);
+  setupSliderLabel(xTranslateSliders + (20.5 * sliderSpacer), 3.5 * sliderHeight, false, 'Octave');
   // Filter sliders
   filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 1024, 1024, true);
   setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), sliderHeight, true, 'Filter Frequency');
@@ -111,10 +117,13 @@ function playNote(note) {
   triAmp  = map(triSlider.value(), 0, 256, 0.0, 1.0);
   subAmp  = map(subSlider.value(), 0, 256, 0.0, 1.0);
 
+  var octaveModifier = map(octaveSlider.value(), 0, 4, -2, 2);
+  note = note + 12 * octaveModifier;
+
   sawOsc.freq(midiToFreq(note));
   sqrOsc.freq(midiToFreq(note));
   triOsc.freq(midiToFreq(note));
-  subOsc.freq(midiToFreq(note));
+  subOsc.freq(midiToFreq(note - 12)); // -12 to drop it an octave, SUB-oscillator
 
   sawEnv.setADSR(attack, decay, sustain, release);
   sawEnv.setRange(sawAmp, 0.0); // 0.0 is the release value
