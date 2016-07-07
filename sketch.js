@@ -29,27 +29,27 @@ var xTranslateKeys, yTranslateKeys;
 // This is a mess of GUI setup, don't mind it too much
 function setupSliders() {
   // Filter sliders
-  filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 10000, 10000, true);
+  filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 1024, 1024, true);
   setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), sliderHeight, true, 'Filter Frequency');
-  filterResSlider  = setupSlider(xTranslateSliders + (2 * sliderSpacer), sliderHeight, 50, 0, true);
+  filterResSlider  = setupSlider(xTranslateSliders + (2 * sliderSpacer), sliderHeight, 64, 0, true);
   setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), sliderHeight, true, 'Filter Resonance');
   // ADSR sliders
-  attackSlider  = setupSlider(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight,   5, 0, true);
+  attackSlider  = setupSlider(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), 2 * sliderHeight, true, 'A');
-  decaySlider   = setupSlider(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight,   5, 1, true);
+  decaySlider   = setupSlider(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
   setupSliderLabel(xTranslateSliders + (1 * sliderSpacer), 2 * sliderHeight, true, 'D');
-  sustainSlider = setupSlider(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 100, 0, true);
+  sustainSlider = setupSlider(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2 * sliderHeight, true, 'S');
-  releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight,   5, 1, true);
+  releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
   setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2 * sliderHeight, true, 'R');
   // Oscillator sliders
-  sawSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 100, 50, true);
+  sawSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 256, 100, true);
   setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), sliderHeight, true, 'SAW');
-  sqrSlider = setupSlider(xTranslateSliders + (16 * sliderSpacer), sliderHeight, 100, 0, true);
+  sqrSlider = setupSlider(xTranslateSliders + (16 * sliderSpacer), sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (16 * sliderSpacer), sliderHeight, true, 'SQR');
-  triSlider = setupSlider(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 100, 0, true);
+  triSlider = setupSlider(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), sliderHeight, true, 'TRI');
-  subSlider = setupSlider(xTranslateSliders + (18 * sliderSpacer), sliderHeight, 100, 0, true);
+  subSlider = setupSlider(xTranslateSliders + (18 * sliderSpacer), sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (18 * sliderSpacer), sliderHeight, true, 'SUB');
 }
 
@@ -102,14 +102,14 @@ function setup() {
 }
 
 function playNote(note) {
-  attack  = attackSlider.value();
-  decay   = decaySlider.value();
-  sustain = map(sustainSlider.value(), 0, 100, 0.0, 1.0);
-  release = releaseSlider.value();
-  sawAmp  = map(sawSlider.value(), 0, 100, 0.0, 1.0);
-  sqrAmp  = map(sqrSlider.value(), 0, 100, 0.0, 1.0);
-  triAmp  = map(triSlider.value(), 0, 100, 0.0, 1.0);
-  subAmp  = map(subSlider.value(), 0, 100, 0.0, 1.0);
+  attack  = map(attackSlider.value(), 0, 256, 0.0, 5.0);
+  decay   = map(decaySlider.value(), 0, 256, 0.0, 8.0);
+  sustain = map(sustainSlider.value(), 0, 256, 0.0, 1.0);
+  release = map(releaseSlider.value(), 0, 256, 0.0, 4.0);
+  sawAmp  = map(sawSlider.value(), 0, 256, 0.0, 1.0);
+  sqrAmp  = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
+  triAmp  = map(triSlider.value(), 0, 256, 0.0, 1.0);
+  subAmp  = map(subSlider.value(), 0, 256, 0.0, 1.0);
 
   sawOsc.freq(midiToFreq(note));
   sqrOsc.freq(midiToFreq(note));
@@ -151,9 +151,10 @@ function endNote() {
 // Called every frame
 function draw() {
   // Update filter parameters with each draw call, this may be changed in the future
-  filterFreq = filterFreqSlider.value();
-  filterRes  = filterResSlider.value();
+  filterFreq = map(filterFreqSlider.value(), 0, 1024, -1, 15000);
+  filterRes  = map(filterResSlider.value(), 0, 64, 0, 50);
   lpf.set(filterFreq, filterRes);
+
   var samples = fft.waveform();
   drawOscilloscope(samples);
   drawKeyboard();
@@ -197,7 +198,9 @@ function drawKeyboard() {
 function mousePressed() {
   if (mouseOverKeys()) {
     var key = floor(map(mouseX, xTranslateKeys,
-      xTranslateKeys + (MIDI_NOTES.length * keyWidth), 0, MIDI_NOTES.length));
+      xTranslateKeys + (MIDI_NOTES.length * keyWidth),
+      0, MIDI_NOTES.length));
+
     playNote(MIDI_NOTES[key]);
   }
 }
