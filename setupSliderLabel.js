@@ -2,13 +2,18 @@ function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText) {
   var labelFontSize = floor(height / 75);
   textSize(labelFontSize);
   var labelWidth = textWidth(labelText);
+  var SLIDER_HEIGHT_MODIFIER = height * 123 / 1000;
   var labelX = sliderX;
   var labelY = sliderY;
   var label;
 
   if (verticalFlag) {
     labelX = labelX + (sliderHeight / 2);
-    labelY = labelY * 1.5;
+    labelY = labelY + floor(SLIDER_HEIGHT_MODIFIER / 2);
+  } else {
+
+    labelX = labelX + floor(height * 123 / 2000);
+    labelY = labelY + 10;
   }
 
   // Wrap text if the ratio of text width to canvas width is too big ( >= .08)
