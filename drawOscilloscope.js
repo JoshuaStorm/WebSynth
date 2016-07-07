@@ -6,6 +6,7 @@ function drawOscilloscope(samples) {
   var scopeHeight = height / 4;
 
   fill(200, 200, 200);
+  // Comment this rect line to make the fun bug
   rect(xTranslateScope, yTranslateScope, scopeWidth, scopeHeight);
 
   stroke(0, 0, 0);
