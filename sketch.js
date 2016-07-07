@@ -48,7 +48,7 @@ function setupSliders() {
   sustainSlider = setupSlider(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, true, 'S');
   releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
-  setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2 * sliderHeight, true, 'R');
+  setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, true, 'R');
   // Oscillator sliders
   sawSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 256, 100, true);
   setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), sliderHeight, true, 'SAW');
