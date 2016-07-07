@@ -33,7 +33,8 @@ var xTranslateKeys, yTranslateKeys;
 function setupSliders() {
   // Octave slider
   octaveSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, 4, 2, false);
-  setupSliderLabel(xTranslateSliders + (20.5 * sliderSpacer), 3.5 * sliderHeight, false, 'Octave');
+  setupSliderLabel(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, false, 'Octave');
+  //setupSliderLabel(xTranslateSliders + (20.5 * sliderSpacer), 3.5 * sliderHeight, false, 'Octave');
   // Filter sliders
   filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 1024, 1024, true);
   setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), sliderHeight, true, 'Filter Frequency');
@@ -41,11 +42,11 @@ function setupSliders() {
   setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), sliderHeight, true, 'Filter Resonance');
   // ADSR sliders
   attackSlider  = setupSlider(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
-  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), 2 * sliderHeight, true, 'A');
+  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, true, 'A');
   decaySlider   = setupSlider(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
-  setupSliderLabel(xTranslateSliders + (1 * sliderSpacer), 2 * sliderHeight, true, 'D');
+  setupSliderLabel(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
   sustainSlider = setupSlider(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
-  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2 * sliderHeight, true, 'S');
+  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, true, 'S');
   releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
   setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2 * sliderHeight, true, 'R');
   // Oscillator sliders
