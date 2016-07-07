@@ -26,59 +26,6 @@ var sliderSpacer;
 var keyWidth, keyHeight;
 var xTranslateKeys, yTranslateKeys;
 
-// Called before setup, setup visual elements
-function preload() {
-  createCanvas(windowWidth, windowHeight);
-  // Initializing some GUI element properties
-  keyWidth = width / (4 * MIDI_NOTES.length);
-  keyHeight = height / 4;
-  xTranslateKeys = width / 2;
-  yTranslateKeys = height / 2;
-  sliderHeight = height / 8;
-  sliderSpacer = width / 30;
-  xTranslateSliders = width / 72;
-
-  setupSliders();
-}
-
-// Called upon loading, setup audio elements
-function setup() {
-  lpf = new p5.Filter();
-  setupOscillators(lpf);
-  // Setup a FFT analyzer at 256 bitrate
-  fft = new p5.FFT(0, 256);
-}
-
-// Set up all of our oscillators
-// TODO: Optimize to only setup oscillators in use to avoid unnecessary computation
-function setupOscillators(filter) {
-  sawOsc = new p5.SawOsc();
-  sqrOsc = new p5.SqrOsc();
-  triOsc = new p5.TriOsc();
-  subOsc = new p5.SinOsc();
-  var oscs = [sawOsc, sqrOsc, triOsc, subOsc];
-  sawEnv = new p5.Env();
-  sqrEnv = new p5.Env();
-  triEnv = new p5.Env();
-  subEnv = new p5.Env();
-  var envs = [sawEnv, sqrEnv, triEnv, subEnv];
-
-  for (var oscIndex in oscs) {
-    var oscillator = oscs[oscIndex];
-    var envelope = envs[oscIndex];
-
-    console.log(envelope);
-
-    // Disconnect osc from output, it will go through the filter
-    oscillator.disconnect();
-    oscillator.start();
-    oscillator.amp(envelope);
-    oscillator.connect(filter);
-    envelope.setExp();
-  }
-}
-
-
 // This is a mess of GUI setup, don't mind it too much
 function setupSliders() {
   // Filter sliders
@@ -106,6 +53,54 @@ function setupSliders() {
   setupSliderLabel(xTranslateSliders + (18 * sliderSpacer), sliderHeight, true, 'SUB');
 }
 
+function loadVisualElements() {
+  createCanvas(windowWidth, windowHeight);
+  // Initializing some GUI element properties
+  keyWidth = width / (4 * MIDI_NOTES.length);
+  keyHeight = height / 4;
+  xTranslateKeys = width / 2;
+  yTranslateKeys = height / 2;
+  sliderHeight = height / 8;
+  sliderSpacer = width / 30;
+  xTranslateSliders = width / 72;
+  setupSliders();
+}
+
+// Set up all of our oscillators
+// TODO: Optimize to only setup oscillators in use to avoid unnecessary computation
+function loadOscillators(filter) {
+  sawOsc = new p5.SawOsc();
+  sqrOsc = new p5.SqrOsc();
+  triOsc = new p5.TriOsc();
+  subOsc = new p5.SinOsc();
+  var oscs = [sawOsc, sqrOsc, triOsc, subOsc];
+  sawEnv = new p5.Env();
+  sqrEnv = new p5.Env();
+  triEnv = new p5.Env();
+  subEnv = new p5.Env();
+  var envs = [sawEnv, sqrEnv, triEnv, subEnv];
+
+  for (var oscIndex in oscs) {
+    var oscillator = oscs[oscIndex];
+    var envelope = envs[oscIndex];
+    // Disconnect osc from output, it will go through the filter
+    oscillator.disconnect();
+    oscillator.start();
+    oscillator.amp(envelope);
+    oscillator.connect(filter);
+    envelope.setExp();
+  }
+}
+
+// Called upon loading, setup audio elements
+function setup() {
+  loadVisualElements();
+  lpf = new p5.Filter();
+  loadOscillators(lpf);
+  // Setup a FFT analyzer at 256 bitrate
+  fft = new p5.FFT(0, 256);
+}
+
 function playNote(note) {
   attack  = attackSlider.value();
   decay   = decaySlider.value();
@@ -130,7 +125,6 @@ function playNote(note) {
   subEnv.setADSR(attack, decay, sustain, release);
   subEnv.setRange(subAmp, 0.0); // 0.0 is the release value
 
-  lpf.set(filterFreq, filterRes);
   if (sawAmp > 0) {
     sawEnv.triggerAttack();
   }
@@ -159,6 +153,7 @@ function draw() {
   // Update filter parameters with each draw call, this may be changed in the future
   filterFreq = filterFreqSlider.value();
   filterRes  = filterResSlider.value();
+  lpf.set(filterFreq, filterRes);
   var samples = fft.waveform();
   drawOscilloscope(samples);
   drawKeyboard();
@@ -240,5 +235,5 @@ function windowResized() {
   // Wipes the canvas and resets elements dynamically
   clear();
   removeElements();
-  preload();
+  loadVisualElements();
 }
