@@ -1,3 +1,5 @@
+'use strict';
+
 var MIDI_NOTES = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
 var KEYBOARD_KEYS = ['a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j'];
 var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
@@ -7,12 +9,13 @@ var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
 var keysPressed = {};
 var pressedIndices = {};
 
-var osc;
-var ampSlider, amp;
-var env;
+var sawOsc, sqrOsc, triOsc, subOsc;
+var sawSlider, sawAmp, sqrSlider, sqrAmp, triSlider, triAmp, subSlider, subAmp;
+var sawEnv, sqrEnv, triEnv, subEnv;
 var lpf;
 var fft;
 
+var octaveSlider;
 var filterFreqSlider, filterFreq;
 var filterResSlider, filterRes;
 var attackSlider, attack;
@@ -26,8 +29,37 @@ var sliderSpacer;
 var keyWidth, keyHeight;
 var xTranslateKeys, yTranslateKeys;
 
-// Called before setup, setup visual elements
-function preload() {
+// This is a mess of GUI setup, don't mind it too much (I am not a UI/UX designer)
+function setupSliders() {
+  // Octave slider
+  octaveSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, 4, 2, false);
+  setupSliderLabel(xTranslateSliders + (20.5 * sliderSpacer), 3.5 * sliderHeight, false, 'Octave');
+  // Filter sliders
+  filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 1024, 1024, true);
+  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), sliderHeight, true, 'Filter Frequency');
+  filterResSlider  = setupSlider(xTranslateSliders + (2 * sliderSpacer), sliderHeight, 64, 0, true);
+  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), sliderHeight, true, 'Filter Resonance');
+  // ADSR sliders
+  attackSlider  = setupSlider(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
+  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), 2 * sliderHeight, true, 'A');
+  decaySlider   = setupSlider(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
+  setupSliderLabel(xTranslateSliders + (1 * sliderSpacer), 2 * sliderHeight, true, 'D');
+  sustainSlider = setupSlider(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
+  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2 * sliderHeight, true, 'S');
+  releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
+  setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2 * sliderHeight, true, 'R');
+  // Oscillator sliders
+  sawSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 256, 100, true);
+  setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), sliderHeight, true, 'SAW');
+  sqrSlider = setupSlider(xTranslateSliders + (16 * sliderSpacer), sliderHeight, 256, 0, true);
+  setupSliderLabel(xTranslateSliders + (16 * sliderSpacer), sliderHeight, true, 'SQR');
+  triSlider = setupSlider(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 256, 0, true);
+  setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), sliderHeight, true, 'TRI');
+  subSlider = setupSlider(xTranslateSliders + (18 * sliderSpacer), sliderHeight, 256, 0, true);
+  setupSliderLabel(xTranslateSliders + (18 * sliderSpacer), sliderHeight, true, 'SUB');
+}
+
+function loadVisualElements() {
   createCanvas(windowWidth, windowHeight);
   // Initializing some GUI element properties
   keyWidth = width / (4 * MIDI_NOTES.length);
@@ -37,75 +69,101 @@ function preload() {
   sliderHeight = height / 8;
   sliderSpacer = width / 30;
   xTranslateSliders = width / 72;
-
   setupSliders();
+}
+
+// Set up all of our oscillators
+// TODO: Optimize to only setup oscillators in use to avoid unnecessary computation
+function loadOscillators(filter) {
+  sawOsc = new p5.SawOsc();
+  sqrOsc = new p5.SqrOsc();
+  triOsc = new p5.TriOsc();
+  subOsc = new p5.SinOsc();
+  var oscs = [sawOsc, sqrOsc, triOsc, subOsc];
+  sawEnv = new p5.Env();
+  sqrEnv = new p5.Env();
+  triEnv = new p5.Env();
+  subEnv = new p5.Env();
+  var envs = [sawEnv, sqrEnv, triEnv, subEnv];
+
+  for (var oscIndex in oscs) {
+    var oscillator = oscs[oscIndex];
+    var envelope = envs[oscIndex];
+    // Disconnect osc from output, it will go through the filter
+    oscillator.disconnect();
+    oscillator.start();
+    oscillator.amp(envelope);
+    oscillator.connect(filter);
+    envelope.setExp();
+  }
 }
 
 // Called upon loading, setup audio elements
 function setup() {
-  osc = new p5.SawOsc();
-  // Disconnect osc from output, it will go through the filter
-  osc.disconnect();
-  osc.start();
-
-  env = new p5.Env();
-  env.setADSR(0.5, 0.25, 0.5, 0.1);
-  env.setRange(.5, 0.0);
-  osc.amp(env);
-
+  loadVisualElements();
   lpf = new p5.Filter();
-  osc.connect(lpf);
+  loadOscillators(lpf);
   // Setup a FFT analyzer at 256 bitrate
   fft = new p5.FFT(0, 256);
 }
 
-// This is a mess of GUI setup, don't mind it too much
-function setupSliders() {
-  filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 10000, 10000, true);
-  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), sliderHeight, true, 'Filter Frequency');
-  filterResSlider  = setupSlider(xTranslateSliders + (2 * sliderSpacer), sliderHeight, 50, 0, true);
-  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), sliderHeight, true, 'Filter Resonance');
-
-  attackSlider  = setupSlider(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight,   5, 0, true);
-  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), 2 * sliderHeight, true, 'A');
-  decaySlider   = setupSlider(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight,   5, 1, true);
-  setupSliderLabel(xTranslateSliders + (1 * sliderSpacer), 2 * sliderHeight, true, 'D');
-  sustainSlider = setupSlider(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 100, 0, true);
-  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2 * sliderHeight, true, 'S');
-  releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight,   5, 1, true);
-  setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2 * sliderHeight, true, 'R');
-
-  ampSlider = setupSlider(xTranslateSliders + (18 * sliderSpacer), sliderHeight, 100, 25, true);
-  setupSliderLabel(xTranslateSliders + (18 * sliderSpacer), sliderHeight, true, 'Amp');
-}
-
 function playNote(note) {
-  attack  = attackSlider.value();
-  decay   = decaySlider.value();
-  sustain = map(sustainSlider.value(), 0, 100, 0.0, 1.0);
-  release = releaseSlider.value();
-  amp = map(ampSlider.value(), 0, 100, 0.0, 1.0);
+  attack  = map(attackSlider.value(), 0, 256, 0.0, 5.0);
+  decay   = map(decaySlider.value(), 0, 256, 0.0, 8.0);
+  sustain = map(sustainSlider.value(), 0, 256, 0.0, 1.0);
+  release = map(releaseSlider.value(), 0, 256, 0.0, 4.0);
+  sawAmp  = map(sawSlider.value(), 0, 256, 0.0, 1.0);
+  sqrAmp  = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
+  triAmp  = map(triSlider.value(), 0, 256, 0.0, 1.0);
+  subAmp  = map(subSlider.value(), 0, 256, 0.0, 1.0);
 
-  osc.freq(midiToFreq(note));
-  env.setADSR(attack, decay, sustain, release);
-  env.setRange(amp, 0.0); // 0.0 is the release value)
-  env.setExp(); // Set the envelope to be an exponential curve
-  lpf.set(filterFreq, filterRes);
+  var octaveModifier = map(octaveSlider.value(), 0, 4, -2, 2);
+  note = note + 12 * octaveModifier;
 
-  env.triggerAttack();
+  sawOsc.freq(midiToFreq(note));
+  sqrOsc.freq(midiToFreq(note));
+  triOsc.freq(midiToFreq(note));
+  subOsc.freq(midiToFreq(note - 12)); // -12 to drop it an octave, SUB-oscillator
+
+  sawEnv.setADSR(attack, decay, sustain, release);
+  sawEnv.setRange(sawAmp, 0.0); // 0.0 is the release value
+  sqrEnv.setADSR(attack, decay, sustain, release);
+  sqrEnv.setRange(sqrAmp, 0.0); // 0.0 is the release value
+  triEnv.setADSR(attack, decay, sustain, release);
+  triEnv.setRange(triAmp, 0.0); // 0.0 is the release value
+  subEnv.setADSR(attack, decay, sustain, release);
+  subEnv.setRange(subAmp, 0.0); // 0.0 is the release value
+
+  if (sawAmp > 0) {
+    sawEnv.triggerAttack();
+  }
+  if (sqrAmp > 0) {
+    sqrEnv.triggerAttack();
+  }
+  if (triAmp > 0) {
+    triEnv.triggerAttack();
+  }
+  if (subAmp > 0) {
+    subEnv.triggerAttack();
+  }
 }
 
 function endNote() {
   if (!mouseIsPressed && !keyIsPressed) {
-    env.triggerRelease();
+    sawEnv.triggerRelease();
+    sqrEnv.triggerRelease();
+    triEnv.triggerRelease();
+    subEnv.triggerRelease();
   }
 }
 
 // Called every frame
 function draw() {
   // Update filter parameters with each draw call, this may be changed in the future
-  filterFreq = filterFreqSlider.value();
-  filterRes  = filterResSlider.value();
+  filterFreq = map(filterFreqSlider.value(), 0, 1024, -1, 15000);
+  filterRes  = map(filterResSlider.value(), 0, 64, 0, 50);
+  lpf.set(filterFreq, filterRes);
+
   var samples = fft.waveform();
   drawOscilloscope(samples);
   drawKeyboard();
@@ -149,7 +207,9 @@ function drawKeyboard() {
 function mousePressed() {
   if (mouseOverKeys()) {
     var key = floor(map(mouseX, xTranslateKeys,
-      xTranslateKeys + (MIDI_NOTES.length * keyWidth), 0, MIDI_NOTES.length));
+      xTranslateKeys + (MIDI_NOTES.length * keyWidth),
+      0, MIDI_NOTES.length));
+
     playNote(MIDI_NOTES[key]);
   }
 }
@@ -187,5 +247,5 @@ function windowResized() {
   // Wipes the canvas and resets elements dynamically
   clear();
   removeElements();
-  preload();
+  loadVisualElements();
 }
