@@ -71,7 +71,6 @@ function loadVisualElements() {
   sliderSpacer = width / 30;
   xTranslateSliders = width / 72;
   setupSliders();
-  var radio = setupRadio(300, 200, ['5five', 'fuck', 'shit', 'cunt', 'bitch', 'lol', 'qq', 'a'], true, 0);
 }
 
 // Set up all of our oscillators

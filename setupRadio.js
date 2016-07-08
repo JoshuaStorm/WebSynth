@@ -20,7 +20,11 @@ function setupRadio(x, y, radioOptions, verticalFlag, defaultOption) {
     thisRadio.style('width', radioWidth + 'px');
   }
 
-  thisRadio.value(defaultOption);
+  if(defaultOption) {
+    thisRadio.value(defaultOption);
+  } else {
+    thisRadio.value(1);
+}
   thisRadio.style('font-size', labelFontSize + 'pt');
   return thisRadio;
 }
