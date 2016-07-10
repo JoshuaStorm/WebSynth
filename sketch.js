@@ -222,11 +222,13 @@ function mouseReleased() {
 
 // Called whenever key is pressed (Ignores action keys)
 function keyTyped() {
+  var lowercaseKey = key.toLowerCase();
+
   // Only play the note if hasn't already played. Avoids retrigger bug
-  if (keysPressed[key] !== true) {
+  if (keysPressed[lowercaseKey] !== true) {
     for (var keyIndex in KEYBOARD_KEYS) {
-      if (key === KEYBOARD_KEYS[keyIndex]) {
-        keysPressed[key] = true;
+      if (lowercaseKey === KEYBOARD_KEYS[keyIndex]) {
+        keysPressed[lowercaseKey] = true;
         pressedIndices[keyIndex] = true;
         playNote(MIDI_NOTES[keyIndex]);
       }
