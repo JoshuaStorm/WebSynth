@@ -1,3 +1,5 @@
+'use strict';
+
 function drawOscilloscope(samples) {
   var yTranslateScope = height / 2;
   var xTranslateScope = width / 72;
