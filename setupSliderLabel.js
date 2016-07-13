@@ -1,3 +1,5 @@
+'use strict';
+
 function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText) {
   var labelFontSize = floor(height / 75);
   textSize(labelFontSize);
