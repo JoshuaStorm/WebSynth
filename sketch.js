@@ -14,12 +14,15 @@ var sawSlider, sqrSlider, triSlider, subSlider;
 var sawUnisonSlider, sqrUnisonSlider, triUnisonSlider, subUnisonSlider;
 var sawDetuneSlider, sqrDetuneSlider, triDetuneSlider, subDetuneSlider;
 var sawEnv, sqrEnv, triEnv, subEnv;
-var lpf;
+var filt;
 var fft;
 
 var octaveSlider;
+
 var filterFreqSlider;
 var filterResSlider;
+var filterTypeRadio;
+
 var attackSlider;
 var decaySlider;
 var sustainSlider;
@@ -80,6 +83,13 @@ function setupSliders() {
   setupSliderLabel(xTranslateSliders + (22 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
 }
 
+function setupRadios() {
+  var x = xTranslateSliders + (2 * sliderSpacer);
+  var y = 0.75 * sliderHeight;
+  var labels = ['LPF', 'BPF', 'HPF'];
+  filterTypeRadio = setupRadio(x, y, labels, true, 1);
+}
+
 function loadVisualElements() {
   createCanvas(windowWidth, windowHeight);
   // Initializing some GUI element properties
@@ -91,6 +101,7 @@ function loadVisualElements() {
   sliderSpacer = width / 30;
   xTranslateSliders = width / 72;
   setupSliders();
+  setupRadios();
 }
 
 // Set up all of our oscillators
@@ -101,17 +112,17 @@ function loadOscillators(filter) {
   triEnv = new p5.Env();
   subEnv = new p5.Env();
   var envs = [sawEnv, sqrEnv, triEnv, subEnv];
-  sawOsc = new UnisonOscillator('sawtooth', sawEnv, lpf);
-  sqrOsc = new UnisonOscillator('square', sqrEnv, lpf);
-  triOsc = new UnisonOscillator('triangle', triEnv, lpf);
-  subOsc = new UnisonOscillator('sine', subEnv, lpf);
+  sawOsc = new UnisonOscillator('sawtooth', sawEnv, filt);
+  sqrOsc = new UnisonOscillator('square', sqrEnv, filt);
+  triOsc = new UnisonOscillator('triangle', triEnv, filt);
+  subOsc = new UnisonOscillator('sine', subEnv, filt);
 }
 
 // Called upon loading, setup audio elements
 function setup() {
   loadVisualElements();
-  lpf = new p5.Filter();
-  loadOscillators(lpf);
+  filt = new p5.Filter();
+  loadOscillators(filt);
   // Setup a FFT analyzer at 256 bitrate
   fft = new p5.FFT(0, 256);
 }
@@ -181,13 +192,36 @@ function endNote() {
   }
 }
 
-// Called every frame
-function draw() {
+// To be called in draw, changes filter parameters
+function changeFilterParameters() {
   // Update filter parameters with each draw call, this may be changed in the future
   var filterFreq = map(filterFreqSlider.value(), 0, 1024, -1, 15000);
   var filterRes  = map(filterResSlider.value(), 0, 64, 0, 50);
-  lpf.set(filterFreq, filterRes);
 
+  var radioValue = filterTypeRadio.value();
+  var filterType;
+  // TODO: Make setupRadio radios return numbers not strings?
+  switch (radioValue) {
+    case '1':
+      filterType = 'lowpass';
+      break;
+    case '2':
+      filterType = 'bandpass';
+      break;
+    case '3':
+      filterType = 'highpass';
+      break;
+    default:
+      filterType = 'lowpass';
+  }
+
+  filt.set(filterFreq, filterRes);
+  filt.setType(filterType);
+}
+
+// Called every frame
+function draw() {
+  changeFilterParameters();
   var samples = fft.waveform();
   drawOscilloscope(samples);
   drawKeyboard();
