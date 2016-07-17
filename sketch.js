@@ -239,15 +239,16 @@ function updateOscillators(midiNote) {
   var triDetune = map(triDetuneSlider.value(), 0, 256, 0.0, 20.0);
   var subDetune = map(subDetuneSlider.value(), 0, 256, 0.0, 20.0);
 
-  var unisonDetuneChanged = sawOsc.set(sawUnison, sawDetune);
-  sqrOsc.set(sqrUnison, sqrDetune);
-  triOsc.set(triUnison, triDetune);
-  subOsc.set(subUnison, subDetune);
+  var unisonChanged = false;
+  unisonChanged = unisonChanged || sawOsc.set(sawUnison, sawDetune);
+  unisonChanged = unisonChanged || sqrOsc.set(sqrUnison, sqrDetune);
+  unisonChanged = unisonChanged || triOsc.set(triUnison, triDetune);
+  unisonChanged = unisonChanged || subOsc.set(subUnison, subDetune);
 
   // Modulate frequency based on LFO if lfoToFreqButton is checked
   if (lfoToFreqButton.checked()) {
     // Need to ensure we don't overlay different LFOs (somehow possible in p5?)
-    if (!lfoStarted || unisonDetuneChanged) {
+    if (!lfoStarted || unisonChanged) {
       lfo.stop();
       lfo.disconnect();
       lfo.start();
