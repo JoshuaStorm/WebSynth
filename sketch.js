@@ -17,6 +17,7 @@ var sawEnv, sqrEnv, triEnv, subEnv;
 var filt;
 var fft;
 
+var currentMidiNote;
 var octaveSlider;
 
 var filterFreqSlider;
@@ -128,6 +129,64 @@ function setup() {
 }
 
 function playNote(midiNote) {
+  var sawAmp  = map(sawSlider.value(), 0, 256, 0.0, 1.0);
+  var sqrAmp  = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
+  var triAmp  = map(triSlider.value(), 0, 256, 0.0, 1.0);
+  var subAmp  = map(subSlider.value(), 0, 256, 0.0, 1.0);
+
+  currentMidiNote = midiNote;
+
+  if (sawAmp > 0) {
+    sawEnv.triggerAttack();
+  }
+  if (sqrAmp > 0) {
+    sqrEnv.triggerAttack();
+  }
+  if (triAmp > 0) {
+    triEnv.triggerAttack();
+  }
+  if (subAmp > 0) {
+    subEnv.triggerAttack();
+  }
+}
+
+function endNote() {
+  if (!mouseIsPressed && !keyIsPressed) {
+    sawEnv.triggerRelease();
+    sqrEnv.triggerRelease();
+    triEnv.triggerRelease();
+    subEnv.triggerRelease();
+  }
+}
+
+// To be called in draw, changes filter parameters
+function updateFilter() {
+  // Update filter parameters with each draw call, this may be changed in the future
+  var filterFreq = map(filterFreqSlider.value(), 0, 1024, -1, 15000);
+  var filterRes  = map(filterResSlider.value(), 0, 64, 0, 50);
+
+  var radioValue = filterTypeRadio.value();
+  var filterType;
+  // TODO: Make setupRadio radios return numbers not strings?
+  switch (radioValue) {
+    case '1':
+      filterType = 'lowpass';
+      break;
+    case '2':
+      filterType = 'bandpass';
+      break;
+    case '3':
+      filterType = 'highpass';
+      break;
+    default:
+      filterType = 'lowpass';
+  }
+
+  filt.set(filterFreq, filterRes);
+  filt.setType(filterType);
+}
+
+function updateOscillators(midiNote) {
   var attack  = map(attackSlider.value(), 0, 256, 0.0, 5.0);
   var decay   = map(decaySlider.value(), 0, 256, 0.0, 8.0);
   var sustain = map(sustainSlider.value(), 0, 256, 0.0, 1.0);
@@ -168,60 +227,12 @@ function playNote(midiNote) {
   triEnv.setRange(triAmp, 0.0); // 0.0 is the release value
   subEnv.setADSR(attack, decay, sustain, release);
   subEnv.setRange(subAmp, 0.0); // 0.0 is the release value
-
-  if (sawAmp > 0) {
-    sawEnv.triggerAttack();
-  }
-  if (sqrAmp > 0) {
-    sqrEnv.triggerAttack();
-  }
-  if (triAmp > 0) {
-    triEnv.triggerAttack();
-  }
-  if (subAmp > 0) {
-    subEnv.triggerAttack();
-  }
-}
-
-function endNote() {
-  if (!mouseIsPressed && !keyIsPressed) {
-    sawEnv.triggerRelease();
-    sqrEnv.triggerRelease();
-    triEnv.triggerRelease();
-    subEnv.triggerRelease();
-  }
-}
-
-// To be called in draw, changes filter parameters
-function changeFilterParameters() {
-  // Update filter parameters with each draw call, this may be changed in the future
-  var filterFreq = map(filterFreqSlider.value(), 0, 1024, -1, 15000);
-  var filterRes  = map(filterResSlider.value(), 0, 64, 0, 50);
-
-  var radioValue = filterTypeRadio.value();
-  var filterType;
-  // TODO: Make setupRadio radios return numbers not strings?
-  switch (radioValue) {
-    case '1':
-      filterType = 'lowpass';
-      break;
-    case '2':
-      filterType = 'bandpass';
-      break;
-    case '3':
-      filterType = 'highpass';
-      break;
-    default:
-      filterType = 'lowpass';
-  }
-
-  filt.set(filterFreq, filterRes);
-  filt.setType(filterType);
 }
 
 // Called every frame
 function draw() {
-  changeFilterParameters();
+  updateFilter();
+  updateOscillators(currentMidiNote);
   var samples = fft.waveform();
   drawOscilloscope(samples);
   drawKeyboard();
