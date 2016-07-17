@@ -67,10 +67,13 @@ UnisonOscillator.prototype._changeUnison = function() {
   }
   this._oscs = oscs;
   this._detunes = detunes;
+
+  return true;
 }
 
 // @param {number} unsion : number of oscillators in unison
 // @param {number} detune : the frequency of detune for the most detuned oscillator in unison
+// @return {boolean} Return whether or not the unison/detune was changed
 UnisonOscillator.prototype.set = function(unison, detune) {
   if (typeof unison !== 'number' || typeof detune !== 'number') {
     throw new Error('Unison and detune must be numbers.');
@@ -83,13 +86,13 @@ UnisonOscillator.prototype.set = function(unison, detune) {
   }
   // If there is no change in unison/detune, don't do anything
   if (this.unison === unison && this.detune === detune) {
-    return;
+    return false;
   }
 
   this.unison = unison;
   this.detune = detune;
 
-  this._changeUnison();
+  return this._changeUnison();
 }
 
 // @param {p5.Filter} filter - The filter the sound source will go through
@@ -121,6 +124,11 @@ UnisonOscillator.prototype.changeEnvelope = function(envelope) {
 
 // @param {number} note - The frequency (NOT MIDI) the oscillator will play
 UnisonOscillator.prototype.freq = function(note) {
+  // If this is a oscillator passed in (LFO), extra handling is needed
+  if (typeof note === 'object') {
+    this._frequencyModulate(note);
+    return;
+  };
   var unison = this.unison;
   var oscs = this._oscs;
   var detunes = this._detunes;
@@ -128,5 +136,15 @@ UnisonOscillator.prototype.freq = function(note) {
   for (var i = 0; i < unison; i++) {
     var thisFrequency = note + detunes[i];
     oscs[i].freq(thisFrequency);
+  }
+}
+
+// @private
+UnisonOscillator.prototype._frequencyModulate = function(modulator) {
+  var unison = this.unison;
+  var oscs = this._oscs;
+  var detunes = this._detunes;
+  for (var i = 0; i < unison; i++) {
+    oscs[i].freq(modulator);
   }
 }

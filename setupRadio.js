@@ -2,7 +2,7 @@
 // This Radio object's values will be OFF BY ONE. This
 // means that the first button will have value of 1, not 0
 
-function setupRadio(x, y, labelsArray, verticalFlag, defaultButton) {
+function setupRadios(x, y, labelsArray, verticalFlag, defaultButton) {
   var BUTTON_WIDTH = 30; // In pixels
   var labelFontSize = floor(height / 75);
   var thisRadio = createRadio();
