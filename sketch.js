@@ -252,6 +252,9 @@ function updateOscillators(midiNote) {
       lfo.disconnect();
       lfo.start();
       sawOsc.freq(lfo);
+      sqrOsc.freq(lfo);
+      triOsc.freq(lfo);
+      subOsc.freq(lfo);
       lfoStarted = true;
     }
   } else {
