@@ -1,5 +1,4 @@
 'use strict';
-
 var MIDI_NOTES = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
 var KEYBOARD_KEYS = ['a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j'];
 var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
@@ -14,17 +13,28 @@ var sawSlider, sqrSlider, triSlider, subSlider;
 var sawUnisonSlider, sqrUnisonSlider, triUnisonSlider, subUnisonSlider;
 var sawDetuneSlider, sqrDetuneSlider, triDetuneSlider, subDetuneSlider;
 var sawEnv, sqrEnv, triEnv, subEnv;
-var lpf;
+var filt;
 var fft;
 
+var lfo;
+var lfoStarted = true;
+var lfoShapeRadios;
+var lfoToFreqButton;
+var lfoToFilterButton;
+var lfoAmountSlider;
+var lfoFreqSlider;
+
+var currentMidiNote;
 var octaveSlider;
+
 var filterFreqSlider;
 var filterResSlider;
+var filterTypeRadios;
+
 var attackSlider;
 var decaySlider;
 var sustainSlider;
 var releaseSlider;
-
 
 var sliderHeight;
 var xTranslateSliders;
@@ -78,6 +88,30 @@ function setupSliders() {
   setupSliderLabel(xTranslateSliders + (21 * sliderSpacer), 2.5 * sliderHeight, true, 'U');
   subDetuneSlider = setupSlider(xTranslateSliders + (22 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (22 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
+  // LFO sliders
+  lfoAmountSlider  = setupSlider(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, 1024, 0, true);
+  setupSliderLabel(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, true, 'Amt');
+  lfoFreqSlider    = setupSlider(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, 256, 10, true);
+  setupSliderLabel(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, true, 'λ/c');
+}
+
+function setupButtons() {
+  var x = xTranslateSliders + (4 * sliderSpacer);
+  var y = 0.75 * sliderHeight;
+  var labels = ['LPF', 'BPF', 'HPF'];
+  filterTypeRadios = setupRadios(x, y, labels, true, 1);
+
+  x = x + (6 * sliderSpacer);
+  y = 2.25 * sliderHeight;
+  labels = ['SAW', 'SQR', 'TRI', 'SIN'];
+  lfoShapeRadios = setupRadios(x, y, labels, true, 4);
+
+  lfoToFreqButton = createCheckbox('Frequency');
+  lfoToFilterButton = createCheckbox('Filter');
+
+  x = x + 2 * sliderSpacer;
+  lfoToFreqButton.position(x, y);
+  lfoToFilterButton.position(x, y + 0.175 * sliderHeight);
 }
 
 function loadVisualElements() {
@@ -91,6 +125,7 @@ function loadVisualElements() {
   sliderSpacer = width / 30;
   xTranslateSliders = width / 72;
   setupSliders();
+  setupButtons();
 }
 
 // Set up all of our oscillators
@@ -101,62 +136,37 @@ function loadOscillators(filter) {
   triEnv = new p5.Env();
   subEnv = new p5.Env();
   var envs = [sawEnv, sqrEnv, triEnv, subEnv];
-  sawOsc = new UnisonOscillator('sawtooth', sawEnv, lpf);
-  sqrOsc = new UnisonOscillator('square', sqrEnv, lpf);
-  triOsc = new UnisonOscillator('triangle', triEnv, lpf);
-  subOsc = new UnisonOscillator('sine', subEnv, lpf);
+  sawOsc = new UnisonOscillator('sawtooth', sawEnv, filt);
+  sqrOsc = new UnisonOscillator('square', sqrEnv, filt);
+  triOsc = new UnisonOscillator('triangle', triEnv, filt);
+  subOsc = new UnisonOscillator('sine', subEnv, filt);
+
+  lfo = new p5.Oscillator('sine');
+  lfo.disconnect();
+  lfo.stop();
+
+  sawOsc.freq(lfo);
+  sqrOsc.freq(lfo);
+  triOsc.freq(lfo);
+  subOsc.freq(lfo);
 }
 
 // Called upon loading, setup audio elements
 function setup() {
   loadVisualElements();
-  lpf = new p5.Filter();
-  loadOscillators(lpf);
+  filt = new p5.Filter();
+  loadOscillators(filt);
   // Setup a FFT analyzer at 256 bitrate
   fft = new p5.FFT(0, 256);
 }
 
 function playNote(midiNote) {
-  var attack  = map(attackSlider.value(), 0, 256, 0.0, 5.0);
-  var decay   = map(decaySlider.value(), 0, 256, 0.0, 8.0);
-  var sustain = map(sustainSlider.value(), 0, 256, 0.0, 1.0);
-  var release = map(releaseSlider.value(), 0, 256, 0.0, 4.0);
   var sawAmp  = map(sawSlider.value(), 0, 256, 0.0, 1.0);
   var sqrAmp  = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
   var triAmp  = map(triSlider.value(), 0, 256, 0.0, 1.0);
   var subAmp  = map(subSlider.value(), 0, 256, 0.0, 1.0);
 
-  var sawUnison = sawUnisonSlider.value() + 1;
-  var sqrUnison = sqrUnisonSlider.value() + 1;
-  var triUnison = triUnisonSlider.value() + 1;
-  var subUnison = subUnisonSlider.value() + 1;
-
-  var sawDetune = map(sawDetuneSlider.value(), 0, 256, 0.0, 20.0);
-  var sqrDetune = map(sqrDetuneSlider.value(), 0, 256, 0.0, 20.0);
-  var triDetune = map(triDetuneSlider.value(), 0, 256, 0.0, 20.0);
-  var subDetune = map(subDetuneSlider.value(), 0, 256, 0.0, 20.0);
-
-  sawOsc.set(sawUnison, sawDetune);
-  sqrOsc.set(sqrUnison, sqrDetune);
-  triOsc.set(triUnison, triDetune);
-  subOsc.set(subUnison, subDetune);
-
-  var octaveModifier = map(octaveSlider.value(), 0, 4, -2, 2);
-  midiNote = midiNote + 12 * octaveModifier;
-
-  sawOsc.freq(midiToFreq(midiNote));
-  sqrOsc.freq(midiToFreq(midiNote));
-  triOsc.freq(midiToFreq(midiNote));
-  subOsc.freq(midiToFreq(midiNote - 12)); // -12 to drop it an octave, SUB-oscillator
-
-  sawEnv.setADSR(attack, decay, sustain, release);
-  sawEnv.setRange(sawAmp, 0.0); // 0.0 is the release value
-  sqrEnv.setADSR(attack, decay, sustain, release);
-  sqrEnv.setRange(sqrAmp, 0.0); // 0.0 is the release value
-  triEnv.setADSR(attack, decay, sustain, release);
-  triEnv.setRange(triAmp, 0.0); // 0.0 is the release value
-  subEnv.setADSR(attack, decay, sustain, release);
-  subEnv.setRange(subAmp, 0.0); // 0.0 is the release value
+  currentMidiNote = midiNote;
 
   if (sawAmp > 0) {
     sawEnv.triggerAttack();
@@ -181,12 +191,131 @@ function endNote() {
   }
 }
 
-// Called every frame
-function draw() {
+// To be called in draw, changes filter parameters
+// TODO: Filter modulation with LFO
+function updateFilter() {
   // Update filter parameters with each draw call, this may be changed in the future
   var filterFreq = map(filterFreqSlider.value(), 0, 1024, -1, 15000);
   var filterRes  = map(filterResSlider.value(), 0, 64, 0, 50);
-  lpf.set(filterFreq, filterRes);
+
+  var radioValue = filterTypeRadios.value();
+  var filterType;
+  // TODO: Make setupRadio radios return numbers not strings?
+  switch (radioValue) {
+    case '1':
+      filterType = 'lowpass';
+      break;
+    case '2':
+      filterType = 'bandpass';
+      break;
+    case '3':
+      filterType = 'highpass';
+      break;
+    default:
+      filterType = 'lowpass';
+  }
+
+  filt.set(filterFreq, filterRes);
+  filt.setType(filterType);
+}
+
+function updateOscillators(midiNote) {
+  var attack  = map(attackSlider.value(), 0, 256, 0.0, 5.0);
+  var decay   = map(decaySlider.value(), 0, 256, 0.0, 8.0);
+  var sustain = map(sustainSlider.value(), 0, 256, 0.0, 1.0);
+  var release = map(releaseSlider.value(), 0, 256, 0.0, 4.0);
+  var sawAmp  = map(sawSlider.value(), 0, 256, 0.0, 1.0);
+  var sqrAmp  = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
+  var triAmp  = map(triSlider.value(), 0, 256, 0.0, 1.0);
+  var subAmp  = map(subSlider.value(), 0, 256, 0.0, 1.0);
+
+  var sawUnison = sawUnisonSlider.value() + 1;
+  var sqrUnison = sqrUnisonSlider.value() + 1;
+  var triUnison = triUnisonSlider.value() + 1;
+  var subUnison = subUnisonSlider.value() + 1;
+
+  var sawDetune = map(sawDetuneSlider.value(), 0, 256, 0.0, 20.0);
+  var sqrDetune = map(sqrDetuneSlider.value(), 0, 256, 0.0, 20.0);
+  var triDetune = map(triDetuneSlider.value(), 0, 256, 0.0, 20.0);
+  var subDetune = map(subDetuneSlider.value(), 0, 256, 0.0, 20.0);
+
+  var unisonChanged = false;
+  unisonChanged = unisonChanged || sawOsc.set(sawUnison, sawDetune);
+  unisonChanged = unisonChanged || sqrOsc.set(sqrUnison, sqrDetune);
+  unisonChanged = unisonChanged || triOsc.set(triUnison, triDetune);
+  unisonChanged = unisonChanged || subOsc.set(subUnison, subDetune);
+
+  // Modulate frequency based on LFO if lfoToFreqButton is checked
+  if (lfoToFreqButton.checked()) {
+    // Need to ensure we don't overlay different LFOs (somehow possible in p5?)
+    if (!lfoStarted || unisonChanged) {
+      lfo.stop();
+      lfo.disconnect();
+      lfo.start();
+      sawOsc.freq(lfo);
+      sqrOsc.freq(lfo);
+      triOsc.freq(lfo);
+      subOsc.freq(lfo);
+      lfoStarted = true;
+    }
+  } else {
+    lfo.stop();
+    lfo.disconnect();
+    lfoStarted = false;
+  }
+
+  var octaveModifier = map(octaveSlider.value(), 0, 4, -2, 2);
+  midiNote = midiNote + 12 * octaveModifier;
+  var frequency = midiToFreq(midiNote);
+  var subFrequency = midiToFreq(midiNote - 12);
+
+  sawOsc.freq(frequency);
+  sqrOsc.freq(frequency);
+  triOsc.freq(frequency);
+  subOsc.freq(subFrequency); // -12 to drop it an octave, SUB-oscillator
+
+  sawEnv.setADSR(attack, decay, sustain, release);
+  sawEnv.setRange(sawAmp, 0.0); // 0.0 is the release value
+  sqrEnv.setADSR(attack, decay, sustain, release);
+  sqrEnv.setRange(sqrAmp, 0.0); // 0.0 is the release value
+  triEnv.setADSR(attack, decay, sustain, release);
+  triEnv.setRange(triAmp, 0.0); // 0.0 is the release value
+  subEnv.setADSR(attack, decay, sustain, release);
+  subEnv.setRange(subAmp, 0.0); // 0.0 is the release value
+}
+
+function updateLfo() {
+  var frequency = map(lfoFreqSlider.value(), 0, 256, 1.0, 20.0);
+  var amplitude = map(lfoAmountSlider.value(), 0, 1024, 0.0, 400.0);
+  lfo.freq(frequency);
+  lfo.amp(amplitude);
+
+  var radioValue = lfoShapeRadios.value();
+  var type = ['SAW', 'SQR', 'TRI', 'SIN'];
+
+  switch (radioValue) {
+    case '1':
+      lfo.setType('sawtooth');
+      break;
+    case '2':
+      lfo.setType('square');
+      break;
+    case '3':
+      lfo.setType('triangle');
+      break;
+    case '4':
+      lfo.setType('sine');
+      break;
+    default:
+      lfo.setType('sine');
+  }
+}
+
+// Called every frame
+function draw() {
+  updateFilter();
+  updateOscillators(currentMidiNote);
+  updateLfo();
 
   var samples = fft.waveform();
   drawOscilloscope(samples);
