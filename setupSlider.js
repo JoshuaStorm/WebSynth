@@ -7,5 +7,6 @@ function setupSlider(x, y, size, defaultValue, verticalFlag) {
   }
   thisSlider.size(sliderHeight);
   thisSlider.position(x, y);
+  thisSlider.class('sliders');
   return thisSlider;
 }

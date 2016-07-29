@@ -27,5 +27,6 @@ function setupRadios(x, y, labelsArray, verticalFlag, defaultButton) {
   thisRadio.value(defaultButton || 1);
 
   thisRadio.style('font-size', labelFontSize + 'pt');
+  thisRadio.class('radio');
   return thisRadio;
 }
