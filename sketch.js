@@ -85,7 +85,7 @@ function setupSliders() {
 }
 
 function setupRadios() {
-  var x = xTranslateSliders + (2 * sliderSpacer);
+  var x = xTranslateSliders + (1.5 * sliderSpacer);
   var y = 0.75 * sliderHeight;
   var labels = ['LPF', 'BPF', 'HPF'];
   filterTypeRadio = setupRadio(x, y, labels, true, 1);
