@@ -257,14 +257,14 @@ function drawKeyboard() {
       if (mouseIsPressed) {
         fill(0, 0, 0);
       } else {
-        fill(127, 127, 127);
+        fill(60, 60, 60);
       }
     } else {
       if (pressedIndices[noteIndex] !== undefined) {
         fill(0, 0, 0);
       }
       else {
-        fill(200, 200, 200);
+        fill(177, 177, 177);
       }
     }
     // Draw the key
