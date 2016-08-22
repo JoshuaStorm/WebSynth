@@ -8,11 +8,11 @@ var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
 var keysPressed = {};
 var pressedIndices = {};
 
-var sawOsc, sqrOsc, triOsc, subOsc, noise;
+var sawOsc, sqrOsc, triOsc, subOsc, nseOsc;
 var sawSlider, sqrSlider, triSlider, subSlider, noiseSlider;
 var sawUnisonSlider, sqrUnisonSlider, triUnisonSlider, subUnisonSlider;
 var sawDetuneSlider, sqrDetuneSlider, triDetuneSlider, subDetuneSlider;
-var sawEnv, sqrEnv, triEnv, subEnv, noiseEnv;
+var sawEnv, sqrEnv, triEnv, subEnv, nseEnv;
 var noiseTypeRadios, glitchNoiseButton;
 var noiseType = 'white';
 var filt;
@@ -145,17 +145,17 @@ function loadOscillators(filter) {
   sqrEnv   = new p5.Env();
   triEnv   = new p5.Env();
   subEnv   = new p5.Env();
-  noiseEnv = new p5.Env();
+  nseEnv = new p5.Env();
 
   sawOsc = new UnisonOscillator('sawtooth', sawEnv, filt);
   sqrOsc = new UnisonOscillator('square', sqrEnv, filt);
   triOsc = new UnisonOscillator('triangle', triEnv, filt);
   subOsc = new UnisonOscillator('sine', subEnv, filt);
-  noise  = new p5.Noise();
-  noise.disconnect();
-  noise.start();
-  noise.amp(noiseEnv);
-  noise.connect(filt);
+  nseOsc = new p5.Noise();
+  nseOsc.disconnect();
+  nseOsc.start();
+  nseOsc.amp(nseEnv);
+  nseOsc.connect(filt);
 
   lfo = new p5.Oscillator('sine');
   lfo.disconnect();
@@ -181,7 +181,7 @@ function playNote(midiNote) {
   var sqrAmp   = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
   var triAmp   = map(triSlider.value(), 0, 256, 0.0, 1.0);
   var subAmp   = map(subSlider.value(), 0, 256, 0.0, 1.0);
-  var noiseAmp = map(noiseSlider.value(), 0, 256, 0.0, 1.0);
+  var nseAmp   = map(noiseSlider.value(), 0, 256, 0.0, 1.0);
 
   currentMidiNote = midiNote;
 
@@ -197,8 +197,8 @@ function playNote(midiNote) {
   if (subAmp > 0) {
     subEnv.triggerAttack();
   }
-  if (noiseAmp > 0) {
-    noiseEnv.triggerAttack();
+  if (nseAmp > 0) {
+    nseEnv.triggerAttack();
   }
 }
 
@@ -208,7 +208,7 @@ function endNote() {
     sqrEnv.triggerRelease();
     triEnv.triggerRelease();
     subEnv.triggerRelease();
-    noiseEnv.triggerRelease();
+    nseEnv.triggerRelease();
   }
 }
 
@@ -241,15 +241,15 @@ function updateFilter() {
 }
 
 function updateOscillators(midiNote) {
-  var attack   = map(attackSlider.value(), 0, 256, 0.0, 5.0);
-  var decay    = map(decaySlider.value(), 0, 256, 0.0, 8.0);
-  var sustain  = map(sustainSlider.value(), 0, 256, 0.0, 1.0);
-  var release  = map(releaseSlider.value(), 0, 256, 0.0, 4.0);
-  var sawAmp   = map(sawSlider.value(), 0, 256, 0.0, 1.0);
-  var sqrAmp   = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
-  var triAmp   = map(triSlider.value(), 0, 256, 0.0, 1.0);
-  var subAmp   = map(subSlider.value(), 0, 256, 0.0, 1.0);
-  var noiseAmp = map(noiseSlider.value(), 0, 256, 0.0, 1.0);
+  var attack  = map(attackSlider.value(), 0, 256, 0.0, 5.0);
+  var decay   = map(decaySlider.value(), 0, 256, 0.0, 8.0);
+  var sustain = map(sustainSlider.value(), 0, 256, 0.0, 1.0);
+  var release = map(releaseSlider.value(), 0, 256, 0.0, 4.0);
+  var sawAmp  = map(sawSlider.value(), 0, 256, 0.0, 1.0);
+  var sqrAmp  = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
+  var triAmp  = map(triSlider.value(), 0, 256, 0.0, 1.0);
+  var subAmp  = map(subSlider.value(), 0, 256, 0.0, 1.0);
+  var nseAmp  = map(noiseSlider.value(), 0, 256, 0.0, 1.0);
 
   var sawUnison = sawUnisonSlider.value() + 1;
   var sqrUnison = sqrUnisonSlider.value() + 1;
@@ -304,8 +304,8 @@ function updateOscillators(midiNote) {
   triEnv.setRange(triAmp, 0.0); // 0.0 is the release value
   subEnv.setADSR(attack, decay, sustain, release);
   subEnv.setRange(subAmp, 0.0); // 0.0 is the release value
-  noiseEnv.setADSR(attack, decay, sustain, release);
-  noiseEnv.setRange(noiseAmp, 0.0); // 0.0 is the release value
+  nseEnv.setADSR(attack, decay, sustain, release);
+  nseEnv.setRange(nseAmp, 0.0); // 0.0 is the release value
 }
 
 function updateLfo() {
@@ -339,24 +339,24 @@ function updateNoise() {
   switch (radioValue) {
     case '1':
       if (noiseType !== 'white' || glitchOn) {
-        noise.setType('white');
+        nseOsc.setType('white');
         noiseType = 'white';
       }
       break;
     case '2':
       if (noiseType !== 'brown' || glitchOn) {
-        noise.setType('brown');
+        nseOsc.setType('brown');
         noiseType = 'brown';
       }
       break;
     case '3':
       if (noiseType !== 'pink' || glitchOn) {
-        noise.setType('pink');
+        nseOsc.setType('pink');
         noiseType = 'pink';
       }
       break;
     default:
-      noise.setType('white');
+      nseOsc.setType('white');
       noiseType = 'white';
   }
 }
