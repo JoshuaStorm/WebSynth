@@ -141,10 +141,10 @@ function loadVisualElements() {
 // Set up all of our oscillators
 // TODO: Optimize to only setup oscillators in use to avoid unnecessary computation
 function loadOscillators(filter) {
-  sawEnv   = new p5.Env();
-  sqrEnv   = new p5.Env();
-  triEnv   = new p5.Env();
-  subEnv   = new p5.Env();
+  sawEnv = new p5.Env();
+  sqrEnv = new p5.Env();
+  triEnv = new p5.Env();
+  subEnv = new p5.Env();
   nseEnv = new p5.Env();
 
   sawOsc = new UnisonOscillator('sawtooth', sawEnv, filt);
@@ -177,12 +177,11 @@ function setup() {
 }
 
 function playNote(midiNote) {
-  var sawAmp   = map(sawSlider.value(), 0, 256, 0.0, 1.0);
-  var sqrAmp   = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
-  var triAmp   = map(triSlider.value(), 0, 256, 0.0, 1.0);
-  var subAmp   = map(subSlider.value(), 0, 256, 0.0, 1.0);
-  var nseAmp   = map(noiseSlider.value(), 0, 256, 0.0, 1.0);
-
+  var sawAmp = map(sawSlider.value(), 0, 256, 0.0, 1.0);
+  var sqrAmp = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
+  var triAmp = map(triSlider.value(), 0, 256, 0.0, 1.0);
+  var subAmp = map(subSlider.value(), 0, 256, 0.0, 1.0);
+  var nseAmp = map(noiseSlider.value(), 0, 256, 0.0, 1.0);
   currentMidiNote = midiNote;
 
   if (sawAmp > 0) {
