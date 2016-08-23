@@ -48,54 +48,54 @@ var xTranslateKeys, yTranslateKeys;
 // This is a mess of GUI setup, don't mind it too much (I am not a UI/UX designer)
 function setupSliders() {
   // Octave slider
-  octaveSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, 4, 2, false);
+  octaveSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, 4, 2);
   setupSliderLabel(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, false, 'Octave');
   // Filter sliders
-  filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 1024, 1024, true);
+  filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 1024, 1024, { vertical : true });
   setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), sliderHeight, true, 'Filter Frequency');
-  filterResSlider  = setupSlider(xTranslateSliders + (2 * sliderSpacer), sliderHeight, 64, 0, true);
+  filterResSlider  = setupSlider(xTranslateSliders + (2 * sliderSpacer), sliderHeight, 64, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), sliderHeight, true, 'Filter Resonance');
   // ADSR sliders
-  attackSlider  = setupSlider(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
+  attackSlider  = setupSlider(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, true, 'A');
-  decaySlider   = setupSlider(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
+  decaySlider   = setupSlider(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, 256, 25, { vertical : true });
   setupSliderLabel(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
-  sustainSlider = setupSlider(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
+  sustainSlider = setupSlider(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, true, 'S');
-  releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
+  releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, 256, 25, { vertical : true });
   setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, true, 'R');
   // Oscillator+noise sliders
-  noiseSlider = setupSlider(xTranslateSliders + (13 * sliderSpacer), sliderHeight, 256, 0, true);
+  noiseSlider = setupSlider(xTranslateSliders + (13 * sliderSpacer), sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (13 * sliderSpacer), sliderHeight, true, 'NOISE');
-  sawSlider  = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 256, 100, true);
+  sawSlider   = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 256, 100, { vertical : true });
   setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), sliderHeight, true, 'SAW');
-  sqrSlider  = setupSlider(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 256, 0, true);
+  sqrSlider   = setupSlider(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), sliderHeight, true, 'SQR');
-  triSlider  = setupSlider(xTranslateSliders + (19 * sliderSpacer), sliderHeight, 256, 0, true);
+  triSlider   = setupSlider(xTranslateSliders + (19 * sliderSpacer), sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (19* sliderSpacer), sliderHeight, true, 'TRI');
-  subSlider  = setupSlider(xTranslateSliders + (21 * sliderSpacer), sliderHeight, 256, 0, true);
+  subSlider   = setupSlider(xTranslateSliders + (21 * sliderSpacer), sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (21 * sliderSpacer), sliderHeight, true, 'SUB');
   // Unison and detune sliders
-  sawUnisonSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), 2.5 * sliderHeight, 8, 0, true);
+  sawUnisonSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), 2.5 * sliderHeight, 8, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), 2.5 * sliderHeight, true, 'U');
-  sawDetuneSlider = setupSlider(xTranslateSliders + (16 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
+  sawDetuneSlider = setupSlider(xTranslateSliders + (16 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (16 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
-  sqrUnisonSlider = setupSlider(xTranslateSliders + (17 * sliderSpacer), 2.5 * sliderHeight, 8, 0, true);
+  sqrUnisonSlider = setupSlider(xTranslateSliders + (17 * sliderSpacer), 2.5 * sliderHeight, 8, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), 2.5 * sliderHeight, true, 'U');
-  sqrDetuneSlider = setupSlider(xTranslateSliders + (18 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
+  sqrDetuneSlider = setupSlider(xTranslateSliders + (18 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (18 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
-  triUnisonSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), 2.5 * sliderHeight, 8, 0, true);
+  triUnisonSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), 2.5 * sliderHeight, 8, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (19 * sliderSpacer), 2.5 * sliderHeight, true, 'U');
-  triDetuneSlider = setupSlider(xTranslateSliders + (20 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
+  triDetuneSlider = setupSlider(xTranslateSliders + (20 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (20 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
-  subUnisonSlider = setupSlider(xTranslateSliders + (21 * sliderSpacer), 2.5 * sliderHeight, 8, 0, true);
+  subUnisonSlider = setupSlider(xTranslateSliders + (21 * sliderSpacer), 2.5 * sliderHeight, 8, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (21 * sliderSpacer), 2.5 * sliderHeight, true, 'U');
-  subDetuneSlider = setupSlider(xTranslateSliders + (22 * sliderSpacer), 2.5 * sliderHeight, 256, 0, true);
+  subDetuneSlider = setupSlider(xTranslateSliders + (22 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (22 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
   // LFO sliders
-  lfoAmountSlider  = setupSlider(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, 1024, 0, true);
+  lfoAmountSlider = setupSlider(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, 1024, 0, { vertical : true });
   setupSliderLabel(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, true, 'Amt');
-  lfoFreqSlider    = setupSlider(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, 256, 10, true);
+  lfoFreqSlider   = setupSlider(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, 256, 10, { vertical : true });
   setupSliderLabel(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, true, 'λ/c');
 }
 
