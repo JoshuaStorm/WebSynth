@@ -8,11 +8,13 @@ var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
 var keysPressed = {};
 var pressedIndices = {};
 
-var sawOsc, sqrOsc, triOsc, subOsc;
-var sawSlider, sqrSlider, triSlider, subSlider;
+var sawOsc, sqrOsc, triOsc, subOsc, nseOsc;
+var sawSlider, sqrSlider, triSlider, subSlider, noiseSlider;
 var sawUnisonSlider, sqrUnisonSlider, triUnisonSlider, subUnisonSlider;
 var sawDetuneSlider, sqrDetuneSlider, triDetuneSlider, subDetuneSlider;
-var sawEnv, sqrEnv, triEnv, subEnv;
+var sawEnv, sqrEnv, triEnv, subEnv, nseEnv;
+var noiseTypeRadios, glitchNoiseButton;
+var noiseType = 'white';
 var filt;
 var fft;
 
@@ -62,14 +64,16 @@ function setupSliders() {
   setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, true, 'S');
   releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, 256, 25, true);
   setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, true, 'R');
-  // Oscillator sliders
-  sawSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 256, 100, true);
+  // Oscillator+noise sliders
+  noiseSlider = setupSlider(xTranslateSliders + (13 * sliderSpacer), sliderHeight, 256, 0, true);
+  setupSliderLabel(xTranslateSliders + (13 * sliderSpacer), sliderHeight, true, 'NOISE');
+  sawSlider  = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 256, 100, true);
   setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), sliderHeight, true, 'SAW');
-  sqrSlider = setupSlider(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 256, 0, true);
+  sqrSlider  = setupSlider(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), sliderHeight, true, 'SQR');
-  triSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), sliderHeight, 256, 0, true);
+  triSlider  = setupSlider(xTranslateSliders + (19 * sliderSpacer), sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (19* sliderSpacer), sliderHeight, true, 'TRI');
-  subSlider = setupSlider(xTranslateSliders + (21 * sliderSpacer), sliderHeight, 256, 0, true);
+  subSlider  = setupSlider(xTranslateSliders + (21 * sliderSpacer), sliderHeight, 256, 0, true);
   setupSliderLabel(xTranslateSliders + (21 * sliderSpacer), sliderHeight, true, 'SUB');
   // Unison and detune sliders
   sawUnisonSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), 2.5 * sliderHeight, 8, 0, true);
@@ -106,13 +110,18 @@ function setupButtons() {
   y = 2.25 * sliderHeight;
   labels = ['SAW', 'SQR', 'TRI', 'SIN'];
   lfoShapeRadios = setupRadios(x, y, labels, true, 4);
-
   lfoToFreqButton = createCheckbox('Frequency');
   lfoToFilterButton = createCheckbox('Filter');
-
   x = x + 2 * sliderSpacer;
   lfoToFreqButton.position(x, y);
   lfoToFilterButton.position(x, y + 0.175 * sliderHeight);
+
+  x = xTranslateSliders + (14.25 * sliderSpacer);
+  y = 0.75 * sliderHeight;
+  labels = ['White', 'Brown', 'Pink'];
+  noiseTypeRadios = setupRadios(x, y, labels, true, 1);
+  glitchNoiseButton = createCheckbox('???');
+  glitchNoiseButton.position(x, y + 0.5 * sliderHeight);
 }
 
 function loadVisualElements() {
@@ -136,11 +145,17 @@ function loadOscillators(filter) {
   sqrEnv = new p5.Env();
   triEnv = new p5.Env();
   subEnv = new p5.Env();
-  var envs = [sawEnv, sqrEnv, triEnv, subEnv];
+  nseEnv = new p5.Env();
+
   sawOsc = new UnisonOscillator('sawtooth', sawEnv, filt);
   sqrOsc = new UnisonOscillator('square', sqrEnv, filt);
   triOsc = new UnisonOscillator('triangle', triEnv, filt);
   subOsc = new UnisonOscillator('sine', subEnv, filt);
+  nseOsc = new p5.Noise();
+  nseOsc.disconnect();
+  nseOsc.start();
+  nseOsc.amp(nseEnv);
+  nseOsc.connect(filt);
 
   lfo = new p5.Oscillator('sine');
   lfo.disconnect();
@@ -162,11 +177,11 @@ function setup() {
 }
 
 function playNote(midiNote) {
-  var sawAmp  = map(sawSlider.value(), 0, 256, 0.0, 1.0);
-  var sqrAmp  = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
-  var triAmp  = map(triSlider.value(), 0, 256, 0.0, 1.0);
-  var subAmp  = map(subSlider.value(), 0, 256, 0.0, 1.0);
-
+  var sawAmp = map(sawSlider.value(), 0, 256, 0.0, 1.0);
+  var sqrAmp = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
+  var triAmp = map(triSlider.value(), 0, 256, 0.0, 1.0);
+  var subAmp = map(subSlider.value(), 0, 256, 0.0, 1.0);
+  var nseAmp = map(noiseSlider.value(), 0, 256, 0.0, 1.0);
   currentMidiNote = midiNote;
 
   if (sawAmp > 0) {
@@ -181,6 +196,9 @@ function playNote(midiNote) {
   if (subAmp > 0) {
     subEnv.triggerAttack();
   }
+  if (nseAmp > 0) {
+    nseEnv.triggerAttack();
+  }
 }
 
 function endNote() {
@@ -189,6 +207,7 @@ function endNote() {
     sqrEnv.triggerRelease();
     triEnv.triggerRelease();
     subEnv.triggerRelease();
+    nseEnv.triggerRelease();
   }
 }
 
@@ -229,6 +248,7 @@ function updateOscillators(midiNote) {
   var sqrAmp  = map(sqrSlider.value(), 0, 256, 0.0, 1.0);
   var triAmp  = map(triSlider.value(), 0, 256, 0.0, 1.0);
   var subAmp  = map(subSlider.value(), 0, 256, 0.0, 1.0);
+  var nseAmp  = map(noiseSlider.value(), 0, 256, 0.0, 1.0);
 
   var sawUnison = sawUnisonSlider.value() + 1;
   var sqrUnison = sqrUnisonSlider.value() + 1;
@@ -283,6 +303,8 @@ function updateOscillators(midiNote) {
   triEnv.setRange(triAmp, 0.0); // 0.0 is the release value
   subEnv.setADSR(attack, decay, sustain, release);
   subEnv.setRange(subAmp, 0.0); // 0.0 is the release value
+  nseEnv.setADSR(attack, decay, sustain, release);
+  nseEnv.setRange(nseAmp, 0.0); // 0.0 is the release value
 }
 
 function updateLfo() {
@@ -292,8 +314,6 @@ function updateLfo() {
   lfo.amp(amplitude);
 
   var radioValue = lfoShapeRadios.value();
-  var type = ['SAW', 'SQR', 'TRI', 'SIN'];
-
   switch (radioValue) {
     case '1':
       lfo.setType('sawtooth');
@@ -312,9 +332,39 @@ function updateLfo() {
   }
 }
 
+function updateNoise() {
+  var radioValue = noiseTypeRadios.value();
+  var glitchOn = glitchNoiseButton.checked()
+  switch (radioValue) {
+    case '1':
+      if (noiseType !== 'white' || glitchOn) {
+        nseOsc.setType('white');
+        noiseType = 'white';
+      }
+      break;
+    case '2':
+      if (noiseType !== 'brown' || glitchOn) {
+        nseOsc.setType('brown');
+        noiseType = 'brown';
+      }
+      break;
+    case '3':
+      if (noiseType !== 'pink' || glitchOn) {
+        nseOsc.setType('pink');
+        noiseType = 'pink';
+      }
+      break;
+    default:
+      nseOsc.setType('white');
+      noiseType = 'white';
+  }
+}
+
 // Called every frame
 function draw() {
   updateFilter();
+  updateNoise();
+
   updateOscillators(currentMidiNote);
   updateLfo();
 
