@@ -1,6 +1,14 @@
 'use strict';
 
-function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText) {
+function setupSliderLabel(sliderX, sliderY, labelText, verticalFlag, steppedFlag) {
+  if (steppedFlag) {
+    _setupSteppedLabel(sliderX, sliderY, labelText, verticalFlag);
+  } else {
+    _setupLabel(sliderX, sliderY, labelText, verticalFlag);
+  }
+}
+
+function _setupLabel(sliderX, sliderY, labelText, verticalFlag) {
   var labelFontSize = floor(height / 75);
   textSize(labelFontSize);
   var labelWidth = textWidth(labelText);
@@ -13,7 +21,6 @@ function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText) {
     labelX = labelX + (sliderHeight / 2);
     labelY = labelY + floor(SLIDER_HEIGHT_MODIFIER / 2);
   } else {
-
     labelX = labelX + floor(height * 123 / 2000);
     labelY = labelY + 10;
   }
@@ -41,4 +48,8 @@ function setupSliderLabel(sliderX, sliderY, verticalFlag, labelText) {
     label.style('color', '#000');
     label.style('font-size', labelFontSize + 'pt');
   }
+}
+
+function _setupSteppedLabel(sliderX, sliderY, labelText, verticalFlag) {
+  
 }
