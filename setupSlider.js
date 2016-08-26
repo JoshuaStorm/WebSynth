@@ -17,9 +17,11 @@ function setupSlider(x, y, size, defaultValue, options) {
   var steppedFlag = options.stepped || false;
 
   var thisSlider = createSlider(0, size, defaultValue);
+
   if (verticalFlag) {
     thisSlider.style('rotate', 270);
   }
+
   thisSlider.size(sliderHeight);
   thisSlider.position(x, y);
 

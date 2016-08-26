@@ -13,14 +13,15 @@ var sawSlider, sqrSlider, triSlider, subSlider, noiseSlider;
 var sawUnisonSlider, sqrUnisonSlider, triUnisonSlider, subUnisonSlider;
 var sawDetuneSlider, sqrDetuneSlider, triDetuneSlider, subDetuneSlider;
 var sawEnv, sqrEnv, triEnv, subEnv, nseEnv;
-var noiseTypeRadios, glitchNoiseButton;
+var glitchNoiseButton;
+var noiseTypeSlider;
 var noiseType = 'white';
 var filt;
 var fft;
 
 var lfo;
 var lfoStarted = true;
-var lfoShapeRadios;
+var lfoShapeSlider;
 var lfoToFreqButton;
 var lfoToFilterButton;
 var lfoAmountSlider;
@@ -31,8 +32,8 @@ var octaveSlider;
 
 var filterFreqSlider;
 var filterResSlider;
-var filterTypeRadios;
-
+var filterTypeSlider;
+xr4q
 var attackSlider;
 var decaySlider;
 var sustainSlider;
@@ -49,79 +50,78 @@ var xTranslateKeys, yTranslateKeys;
 function setupSliders() {
   // Octave slider
   octaveSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, 4, 2);
-  setupSliderLabel(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, false, 'Octave');
+  setupSliderLabel(xTranslateSliders + (19 * sliderSpacer), 3.5 * sliderHeight, 'Octave', false);
   // Filter sliders
   filterFreqSlider = setupSlider(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 1024, 1024, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), sliderHeight, true, 'Filter Frequency');
+  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), sliderHeight, 'Filter Frequency', true);
   filterResSlider  = setupSlider(xTranslateSliders + (2 * sliderSpacer), sliderHeight, 64, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), sliderHeight, true, 'Filter Resonance');
+  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), sliderHeight, 'Filter Resonance', true);
   // ADSR sliders
   attackSlider  = setupSlider(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, true, 'A');
+  setupSliderLabel(xTranslateSliders + (0 * sliderSpacer), 2.5 * sliderHeight, 'A', true);
   decaySlider   = setupSlider(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, 256, 25, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
+  setupSliderLabel(xTranslateSliders + (1 * sliderSpacer), 2.5 * sliderHeight, 'D', true);
   sustainSlider = setupSlider(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, true, 'S');
+  setupSliderLabel(xTranslateSliders + (2 * sliderSpacer), 2.5 * sliderHeight, 'S', true);
   releaseSlider = setupSlider(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, 256, 25, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, true, 'R');
+  setupSliderLabel(xTranslateSliders + (3 * sliderSpacer), 2.5 * sliderHeight, 'R', true);
   // Oscillator+noise sliders
   noiseSlider = setupSlider(xTranslateSliders + (13 * sliderSpacer), sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (13 * sliderSpacer), sliderHeight, true, 'NOISE');
+  setupSliderLabel(xTranslateSliders + (13 * sliderSpacer), sliderHeight, 'NOISE', true);
   sawSlider   = setupSlider(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 256, 100, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), sliderHeight, true, 'SAW');
+  setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), sliderHeight, 'SAW', true);
   sqrSlider   = setupSlider(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), sliderHeight, true, 'SQR');
+  setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), sliderHeight, 'SQR', true);
   triSlider   = setupSlider(xTranslateSliders + (19 * sliderSpacer), sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (19* sliderSpacer), sliderHeight, true, 'TRI');
+  setupSliderLabel(xTranslateSliders + (19* sliderSpacer), sliderHeight, 'TRI', true);
   subSlider   = setupSlider(xTranslateSliders + (21 * sliderSpacer), sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (21 * sliderSpacer), sliderHeight, true, 'SUB');
+  setupSliderLabel(xTranslateSliders + (21 * sliderSpacer), sliderHeight, 'SUB', true);
   // Unison and detune sliders
   sawUnisonSlider = setupSlider(xTranslateSliders + (15 * sliderSpacer), 2.5 * sliderHeight, 8, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), 2.5 * sliderHeight, true, 'U');
+  setupSliderLabel(xTranslateSliders + (15 * sliderSpacer), 2.5 * sliderHeight, 'U', true);
   sawDetuneSlider = setupSlider(xTranslateSliders + (16 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (16 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
+  setupSliderLabel(xTranslateSliders + (16 * sliderSpacer), 2.5 * sliderHeight, 'D', true);
   sqrUnisonSlider = setupSlider(xTranslateSliders + (17 * sliderSpacer), 2.5 * sliderHeight, 8, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), 2.5 * sliderHeight, true, 'U');
+  setupSliderLabel(xTranslateSliders + (17 * sliderSpacer), 2.5 * sliderHeight, 'U', true);
   sqrDetuneSlider = setupSlider(xTranslateSliders + (18 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (18 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
+  setupSliderLabel(xTranslateSliders + (18 * sliderSpacer), 2.5 * sliderHeight, 'D', true);
   triUnisonSlider = setupSlider(xTranslateSliders + (19 * sliderSpacer), 2.5 * sliderHeight, 8, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (19 * sliderSpacer), 2.5 * sliderHeight, true, 'U');
+  setupSliderLabel(xTranslateSliders + (19 * sliderSpacer), 2.5 * sliderHeight, 'U', true);
   triDetuneSlider = setupSlider(xTranslateSliders + (20 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (20 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
+  setupSliderLabel(xTranslateSliders + (20 * sliderSpacer), 2.5 * sliderHeight, 'D', true);
   subUnisonSlider = setupSlider(xTranslateSliders + (21 * sliderSpacer), 2.5 * sliderHeight, 8, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (21 * sliderSpacer), 2.5 * sliderHeight, true, 'U');
+  setupSliderLabel(xTranslateSliders + (21 * sliderSpacer), 2.5 * sliderHeight, 'U', true);
   subDetuneSlider = setupSlider(xTranslateSliders + (22 * sliderSpacer), 2.5 * sliderHeight, 256, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (22 * sliderSpacer), 2.5 * sliderHeight, true, 'D');
+  setupSliderLabel(xTranslateSliders + (22 * sliderSpacer), 2.5 * sliderHeight, 'D', true);
   // LFO sliders
   lfoAmountSlider = setupSlider(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, 1024, 0, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, true, 'Amt');
+  setupSliderLabel(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, 'Amt', true);
   lfoFreqSlider   = setupSlider(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, 256, 10, { vertical : true });
-  setupSliderLabel(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, true, 'λ/c');
+  setupSliderLabel(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, 'λ/c', true);
 }
 
 
 function setupButtons() {
-  var x = xTranslateSliders + (4 * sliderSpacer);
-  var y = 0.75 * sliderHeight;
-  var labels = ['LPF', 'BPF', 'HPF'];
-  filterTypeRadios = setupRadios(x, y, labels, true, 1);
+  var x = xTranslateSliders + (10.5 * sliderSpacer);
+  var y = 2.25 * sliderHeight;
 
-  x = x + (6 * sliderSpacer);
-  y = 2.25 * sliderHeight;
-  labels = ['SAW', 'SQR', 'TRI', 'SIN'];
-  lfoShapeRadios = setupRadios(x, y, labels, true, 4);
   lfoToFreqButton = createCheckbox('Frequency');
   lfoToFilterButton = createCheckbox('Filter');
-  x = x + 2 * sliderSpacer;
+
   lfoToFreqButton.position(x, y);
   lfoToFilterButton.position(x, y + 0.175 * sliderHeight);
 
-  x = xTranslateSliders + (14.25 * sliderSpacer);
-  y = 0.75 * sliderHeight;
-  labels = ['White', 'Brown', 'Pink'];
-  noiseTypeRadios = setupRadios(x, y, labels, true, 1);
+  x = xTranslateSliders + (13.75 * sliderSpacer);
+  y = 1.8 * sliderHeight;
+
   glitchNoiseButton = createCheckbox('???');
-  glitchNoiseButton.position(x, y + 0.5 * sliderHeight);
+  glitchNoiseButton.position(x, y);
+}
+
+function setupSteppedSlider() {
+  noiseTypeSlider = setupSlider(xTranslateSliders + (13.75 * sliderSpacer), sliderHeight, 2, 2, { vertical : true, stepped : true });
+  lfoShapeSlider = setupSlider(xTranslateSliders + (8.75 * sliderSpacer), 2.5 * sliderHeight, 3, 0, { vertical : true, stepped : true });
+  filterTypeSlider = setupSlider(xTranslateSliders + (2.75 * sliderSpacer), sliderHeight, 2, 2, { vertical : true, stepped : true });
 }
 
 function loadVisualElements() {
@@ -136,6 +136,7 @@ function loadVisualElements() {
   xTranslateSliders = width / 72;
   setupSliders();
   setupButtons();
+  setupSteppedSlider();
 }
 
 // Set up all of our oscillators
@@ -146,6 +147,12 @@ function loadOscillators(filter) {
   triEnv = new p5.Env();
   subEnv = new p5.Env();
   nseEnv = new p5.Env();
+  // Make every envelope an exponential curve envelope
+  sawEnv.setExp();
+  sqrEnv.setExp();
+  triEnv.setExp();
+  subEnv.setExp();
+  nseEnv.setExp();
 
   sawOsc = new UnisonOscillator('sawtooth', sawEnv, filt);
   sqrOsc = new UnisonOscillator('square', sqrEnv, filt);
@@ -218,17 +225,16 @@ function updateFilter() {
   var filterFreq = map(filterFreqSlider.value(), 0, 1024, -1, 15000);
   var filterRes  = map(filterResSlider.value(), 0, 64, 0, 50);
 
-  var radioValue = filterTypeRadios.value();
+  var steppedValue = filterTypeSlider.value();
   var filterType;
-  // TODO: Make setupRadio radios return numbers not strings?
-  switch (radioValue) {
-    case '1':
+  switch (steppedValue) {
+    case 2:
       filterType = 'lowpass';
       break;
-    case '2':
+    case 1:
       filterType = 'bandpass';
       break;
-    case '3':
+    case 0:
       filterType = 'highpass';
       break;
     default:
@@ -313,18 +319,18 @@ function updateLfo() {
   lfo.freq(frequency);
   lfo.amp(amplitude);
 
-  var radioValue = lfoShapeRadios.value();
-  switch (radioValue) {
-    case '1':
+  var steppedValue = lfoShapeSlider.value();
+  switch (steppedValue) {
+    case 3:
       lfo.setType('sawtooth');
       break;
-    case '2':
+    case 2:
       lfo.setType('square');
       break;
-    case '3':
+    case 1:
       lfo.setType('triangle');
       break;
-    case '4':
+    case 0:
       lfo.setType('sine');
       break;
     default:
@@ -333,22 +339,23 @@ function updateLfo() {
 }
 
 function updateNoise() {
-  var radioValue = noiseTypeRadios.value();
-  var glitchOn = glitchNoiseButton.checked()
-  switch (radioValue) {
-    case '1':
+  var steppedValue = noiseTypeSlider.value();
+  var glitchOn = glitchNoiseButton.checked();
+  switch (steppedValue) {
+    case 2:
+      // Due to some weird p5 glitchiness with setting the noisetype to the same type, have to do extra checking
       if (noiseType !== 'white' || glitchOn) {
         nseOsc.setType('white');
         noiseType = 'white';
       }
       break;
-    case '2':
+    case 1:
       if (noiseType !== 'brown' || glitchOn) {
         nseOsc.setType('brown');
         noiseType = 'brown';
       }
       break;
-    case '3':
+    case 0:
       if (noiseType !== 'pink' || glitchOn) {
         nseOsc.setType('pink');
         noiseType = 'pink';
