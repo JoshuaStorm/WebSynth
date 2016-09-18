@@ -440,7 +440,7 @@ function keyTyped() {
     }
   }
   
-  //Increments / Decrements Octave slider if 'Z' or 'X' are pressed
+  // Increments / Decrements Octave slider if 'Z' or 'X' are pressed
   modifyOctave(lowercaseKey);
 }
 
@@ -461,7 +461,7 @@ function windowResized() {
   loadVisualElements();
 }
 
-//Increments or Decrements octave based on key
+// Increments or Decrements octave based on key
 function modifyOctave(keyPressed) {
     var valToAdd = 0;
     
