@@ -3,7 +3,9 @@ var MIDI_NOTES = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
 var KEYBOARD_KEYS = ['a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j'];
 var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
                     'y':8, 'h':9, 'u':10, 'j':11};
-
+var DECREMENT_OCTAVE = 'z';
+var INCREMENT_OVTAVE = 'x';
+                    
 // Global setup, common in p5.js
 var keysPressed = {};
 var pressedIndices = {};
@@ -96,7 +98,7 @@ function setupSliders() {
   lfoAmountSlider  = setupSlider(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, 1024, 0, true);
   setupSliderLabel(xTranslateSliders + (7 * sliderSpacer), 2.5 * sliderHeight, true, 'Amt');
   lfoFreqSlider    = setupSlider(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, 256, 10, true);
-  setupSliderLabel(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, true, 'λ/c');
+  setupSliderLabel(xTranslateSliders + (8 * sliderSpacer), 2.5 * sliderHeight, true, '?/c');
 }
 
 
@@ -437,6 +439,9 @@ function keyTyped() {
       }
     }
   }
+  
+  //Increments / Decrements Octave slider if 'Z' or 'X' are pressed
+  modifyOctave(lowercaseKey);
 }
 
 // Called whenever key is released
@@ -454,4 +459,25 @@ function windowResized() {
   clear();
   removeElements();
   loadVisualElements();
+}
+
+//Increments or Decrements octave based on key
+function modifyOctave(keyPressed) {
+    var valToAdd = 0;
+    
+    if(keyPressed === INCREMENT_OVTAVE) {
+        valToAdd = 1;
+    } else if (keyPressed === DECREMENT_OCTAVE) {
+        valToAdd = -1;
+    } 
+   
+    var modVal = octaveSlider.value() + valToAdd;
+    
+    if (modVal < 0) {
+        modVal = 0;
+    } else if (modVal > 4) {
+        modVal = 4;
+    }
+    
+    octaveSlider.value(modVal);
 }
