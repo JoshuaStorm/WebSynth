@@ -3,6 +3,7 @@ var MIDI_NOTES = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71];
 var KEYBOARD_KEYS = ['a', 'w', 's', 'e', 'd', 'f', 't', 'g', 'y', 'h', 'u', 'j'];
 var KEY_TO_INDEX = {'a':0, 'w':1, 's':2, 'e':3, 'd':4, 'f':5, 't':6, 'g':7,
                     'y':8, 'h':9, 'u':10, 'j':11};
+
 var INCREMENT_OVTAVE = 'x';
 var DECREMENT_OCTAVE = 'z';
                     
