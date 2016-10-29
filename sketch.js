@@ -47,6 +47,8 @@ var sliderSpacer;
 var keyWidth, keyHeight;
 var xTranslateKeys, yTranslateKeys;
 
+// This GUI is swaggy and I love it
+
 // This is a mess of GUI setup, don't mind it too much (I am not a UI/UX designer)
 function setupSliders() {
   // Octave slider
